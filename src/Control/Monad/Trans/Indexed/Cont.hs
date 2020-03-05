@@ -1,0 +1,59 @@
+{-# LANGUAGE
+    DeriveFunctor
+  , FlexibleInstances
+  , GADTs
+#-}
+
+module Control.Monad.Trans.Indexed.Cont
+  ( ContIx (..)
+  , callCCIx
+  , evalContIx
+  , mapContIx
+  , withContIx
+  , resetIx
+  , shiftIx
+  , toContT
+  , fromContT
+  ) where
+
+import Control.Monad.Cont
+import Control.Monad.Trans
+import Control.Monad.Trans.Indexed
+
+newtype ContIx i j m x = ContIx {runContIx :: (x -> m j) -> m i}
+  deriving Functor
+instance IndexedMonadTrans ContIx where
+  ixJoin (ContIx k) = ContIx $ \f -> k $ \(ContIx g) -> g f
+instance (i ~ j, Monad m) => Applicative (ContIx i j m) where
+  pure x = ContIx $ \k -> k x
+  (<*>) = ixAp
+instance (i ~ j, Monad m) => Monad (ContIx i j m) where
+  return x = ContIx $ \k -> k x
+  (>>=) = flip ixBind
+instance i ~ j => MonadTrans (ContIx i j) where
+  lift = ContIx . (>>=)
+instance Monad m => MonadCont (ContIx i i m) where callCC = callCCIx
+
+evalContIx :: Monad m => ContIx x j m j -> m x
+evalContIx c = runContIx c return
+
+mapContIx :: (m i -> m j) -> ContIx i k m x -> ContIx j k m x
+mapContIx g (ContIx f) = ContIx $ g . f
+
+withContIx :: ((y -> m k) -> x -> m j) -> ContIx i j m x -> ContIx i k m y
+withContIx f (ContIx g) = ContIx $ g . f
+
+callCCIx :: ((x -> ContIx j k m y) -> ContIx i j m x) -> ContIx i j m x
+callCCIx f = ContIx $ \k -> runContIx (f (ContIx . const . k)) k
+
+shiftIx :: Monad m => ((x -> m j) -> ContIx i k m k) -> ContIx i j m x
+shiftIx f = ContIx (evalContIx . f)
+
+resetIx :: Monad m => ContIx x j m j -> ContIx i i m x
+resetIx = lift . evalContIx
+
+toContT :: ContIx i i m x -> ContT i m x
+toContT (ContIx f) = ContT f
+
+fromContT :: ContT i m x -> ContIx i i m x
+fromContT (ContT f) = ContIx f

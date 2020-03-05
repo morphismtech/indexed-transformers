@@ -1,0 +1,33 @@
+cabal-version: 1.12
+
+name:           indexed-transformers
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/morphismtech/indexed-transformers#readme>
+homepage:       https://github.com/morphismtech/indexed-transformers#readme
+bug-reports:    https://github.com/morphismtech/indexed-transformers/issues
+author:         Eitan Chatav
+maintainer:     eitan@morphism.tech
+copyright:      2020 Eitan Chatav
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    ChangeLog.md
+
+source-repository head
+  type: git
+  location: https://github.com/morphismtech/indexed-transformers
+
+library
+  exposed-modules:
+      Control.Monad.Trans.Indexed
+      Control.Monad.Trans.Indexed.Cont
+      Control.Monad.Trans.Indexed.State
+  hs-source-dirs:
+      src
+  build-depends:
+      base >=4.7 && <5
+    , transformers
+    , mtl
+  default-language: Haskell2010
