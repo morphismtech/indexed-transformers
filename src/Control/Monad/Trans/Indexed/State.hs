@@ -8,6 +8,10 @@
 
 module Control.Monad.Trans.Indexed.State
   ( StateIx (..)
+  , evalStateIx
+  , execStateIx
+  , modifyIx
+  , putIx
   , toStateT
   , fromStateT
   ) where
@@ -32,6 +36,18 @@ instance i ~ j => MonadTrans (StateIx i j) where
   lift m = StateIx $ \i -> (, i) <$> m
 instance (i ~ j, Monad m) => MonadState i (StateIx i j m) where
   state f = StateIx (return . f)
+
+evalStateIx :: Monad m => StateIx i j m x -> i -> m x
+evalStateIx m i = fst <$> runStateIx m i
+
+execStateIx :: Monad m => StateIx i j m x -> i -> m j
+execStateIx m i = snd <$> runStateIx m i
+
+modifyIx :: Applicative m => (i -> j) -> StateIx i j m ()
+modifyIx f = StateIx $ \i -> pure ((), f i)
+
+putIx :: Applicative m => j -> StateIx i j m ()
+putIx j = modifyIx (\ _ -> j)
 
 toStateT :: StateIx i i m x -> StateT i m x
 toStateT (StateIx f) = StateT f
