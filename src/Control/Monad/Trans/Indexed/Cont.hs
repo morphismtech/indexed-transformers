@@ -24,12 +24,12 @@ newtype ContIx i j m x = ContIx {runContIx :: (x -> m j) -> m i}
   deriving Functor
 instance IndexedMonadTrans ContIx where
   ixJoin (ContIx k) = ContIx $ \f -> k $ \(ContIx g) -> g f
-instance (i ~ j, Monad m) => Applicative (ContIx i j m) where
+instance i ~ j => Applicative (ContIx i j m) where
   pure x = ContIx $ \k -> k x
-  (<*>) = ixAp
-instance (i ~ j, Monad m) => Monad (ContIx i j m) where
+  ContIx cf <*> ContIx cx = ContIx $ \ k -> cf $ \ f -> cx (k . f)
+instance i ~ j => Monad (ContIx i j m) where
   return x = ContIx $ \k -> k x
-  (>>=) = flip ixBind
+  ContIx cx >>= k = ContIx $ \ c -> cx (\ x -> runContIx (k x) c)
 instance i ~ j => MonadTrans (ContIx i j) where
   lift = ContIx . (>>=)
 instance Monad m => MonadCont (ContIx i i m) where callCC = callCCIx
