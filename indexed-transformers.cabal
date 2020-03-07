@@ -23,7 +23,7 @@ library
   exposed-modules:
       Control.Monad.Trans.Indexed
       Control.Monad.Trans.Indexed.Cont
-      Control.Monad.Trans.Indexed.Session
+      Control.Monad.Trans.Indexed.Ix
       Control.Monad.Trans.Indexed.State
   hs-source-dirs:
       src
