@@ -8,6 +8,14 @@
 
 module Control.Monad.Trans.Indexed.Writer
   ( WriterIx (..)
+  , evalWriterIx
+  , execWriterIx
+  , mapWriterIx
+  , tellIx
+  , listenIx
+  , listensIx
+  , passIx
+  , censorIx
   ) where
 
 import Prelude hiding (id, (.))
@@ -39,5 +47,44 @@ instance (i ~ j, Category w) => MonadTrans (WriterIx w i j) where
     x <- m
     return (x, id)
 
+evalWriterIx :: Monad m => WriterIx w i j m x -> m x
+evalWriterIx (WriterIx m) = fst <$> m
+
+execWriterIx :: Monad m => WriterIx w i j m x -> m (w i j)
+execWriterIx (WriterIx m) = snd <$> m
+
+mapWriterIx
+  :: (m (x, w i j) -> n (y, q i j))
+  -> WriterIx w i j m x
+  -> WriterIx q i j n y
+mapWriterIx f m = WriterIx $ f (runWriterIx m)
+
 tellIx :: Monad m => w i j -> WriterIx w i j m ()
 tellIx w = WriterIx (return ((), w))
+
+listenIx :: Monad m => WriterIx w i j m x -> WriterIx w i j m (x, w i j)
+listenIx (WriterIx m) = WriterIx $ do
+  (x, w) <- m
+  return ((x, w),w)
+
+listensIx
+  :: Monad m
+  => (w i j -> y)
+  -> WriterIx w i j m x
+  -> WriterIx w i j m (x, y)
+listensIx f (WriterIx m) = WriterIx $ do
+  (x, w) <- m
+  return ((x, f w), w)
+
+passIx
+  :: Monad m
+  => WriterIx w i j m (x, w i j -> q i j)
+  -> WriterIx q i j m x
+passIx (WriterIx m) = WriterIx $ do
+  ((x, f), w) <- m
+  return (x, f w)
+
+censorIx :: Monad m => (w i j -> w i j) -> WriterIx w i j m x -> WriterIx w i j m x
+censorIx f (WriterIx m) = WriterIx $ do
+  (x, w) <- m
+  return (x, f w)
