@@ -27,7 +27,7 @@ instance (forall i j. Functor (f i j), Monad m)
 newtype FreeIx f i j m x = FreeIx {runFreeIx :: m (FreeIxF f i j m x)}
 instance (forall i j. Functor (f i j), Monad m)
   => Functor (FreeIx f i j m) where
-    fmap f (FreeIx m) = FreeIx $ return . fmap f =<< m
+    fmap f (FreeIx m) = FreeIx $ fmap (fmap f) m
 instance (forall i j. Functor (f i j), i ~ j, Monad m)
   => Applicative (FreeIx f i j m) where
     pure = FreeIx . pure . PureIx
