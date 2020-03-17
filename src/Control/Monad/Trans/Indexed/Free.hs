@@ -18,13 +18,16 @@ import Control.Monad.Trans.Indexed
 data FreeIxF f i j m x where
   PureIx :: x -> FreeIxF f i i m x
   JoinIx :: f i j (FreeIx f j k m x) -> FreeIxF f i k m x
+instance (forall i j. Functor (f i j), Monad m)
+  => Functor (FreeIxF f i j m) where
+    fmap f = \case
+      PureIx x -> PureIx $ f x
+      JoinIx fm -> JoinIx $ fmap (fmap f) fm
 
 newtype FreeIx f i j m x = FreeIx {runFreeIx :: m (FreeIxF f i j m x)}
 instance (forall i j. Functor (f i j), Monad m)
   => Functor (FreeIx f i j m) where
-    fmap f (FreeIx m) = FreeIx $ m >>= \case
-      PureIx x -> return $ PureIx (f x)
-      JoinIx fm -> return $ JoinIx $ fmap (fmap f) fm
+    fmap f (FreeIx m) = FreeIx $ return . fmap f =<< m
 instance (forall i j. Functor (f i j), i ~ j, Monad m)
   => Applicative (FreeIx f i j m) where
     pure = FreeIx . pure . PureIx
