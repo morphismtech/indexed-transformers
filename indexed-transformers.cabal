@@ -23,8 +23,9 @@ library
   exposed-modules:
       Control.Monad.Trans.Indexed
       Control.Monad.Trans.Indexed.Cont
-      Control.Monad.Trans.Indexed.Ix
+      Control.Monad.Trans.Indexed.Free
       Control.Monad.Trans.Indexed.State
+      Control.Monad.Trans.Indexed.Writer
   hs-source-dirs:
       src
   build-depends:
