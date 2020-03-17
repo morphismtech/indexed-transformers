@@ -31,7 +31,7 @@ instance (forall i j. Functor (f i j), i ~ j, Monad m)
     (<*>) = ixAp
 instance (forall i j. Functor (f i j), i ~ j, Monad m)
   => Monad (FreeIx f i j m) where
-    return = FreeIx . pure . PureIx
+    return = FreeIx . return . PureIx
     (>>=) = flip ixBind
 instance (forall i j. Functor (f i j), i ~ j)
   => MonadTrans (FreeIx f i j) where
