@@ -20,6 +20,7 @@ module Control.Monad.Trans.Indexed.Free
   , FreeIxF (..)
   ) where
 
+import Control.Monad.Free
 import Control.Monad.Trans
 import Control.Monad.Trans.Indexed
 import Data.Function ((&))
@@ -67,3 +68,9 @@ instance
   ( forall i j. Functor (f i j)
   ) => IndexedMonadTransFree f (FreeIx f) where
   wrapIx = FreeIx . return . WrapIx
+instance
+  ( forall i j. Functor (f i j)
+  , Monad m
+  , i ~ j
+  ) => MonadFree (f i j) (FreeIx f i j m) where
+    wrap = wrapIx
