@@ -1,16 +1,8 @@
 {-# LANGUAGE
     ConstraintKinds
-  , DataKinds
-  , DeriveFunctor
-  , FlexibleInstances
-  , FunctionalDependencies
-  , GADTs
-  , LambdaCase
-  , MultiParamTypeClasses
   , PolyKinds
   , QuantifiedConstraints
   , RankNTypes
-  , StandaloneDeriving
   , UndecidableInstances
 #-}
 {-# OPTIONS_GHC -fno-warn-name-shadowing #-}

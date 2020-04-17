@@ -1,17 +1,11 @@
 {-# LANGUAGE
     ConstraintKinds
-  , DataKinds
-  , DeriveFunctor
   , FlexibleInstances
-  , FunctionalDependencies
   , GADTs
   , LambdaCase
+  , QuantifiedConstraints
   , MultiParamTypeClasses
   , PolyKinds
-  , QuantifiedConstraints
-  , RankNTypes
-  , StandaloneDeriving
-  , UndecidableInstances
 #-}
 {-# OPTIONS_GHC -fno-warn-name-shadowing #-}
 
@@ -28,7 +22,7 @@ import Control.Monad.Trans.Indexed.Free
 data WrapIx f i j m x where
   Unwrapped :: x -> WrapIx f i i m x
   Wrapped :: f i j (FreeIx f j k m x) -> WrapIx f i k m x
-instance (forall i j. Functor (f i j), Monad m)
+instance (Silo f, Monad m)
   => Functor (WrapIx f i j m) where
     fmap f = \case
       Unwrapped x -> Unwrapped $ f x
@@ -51,27 +45,27 @@ instance SFoldable FreeIx where
   sfoldMap f (FreeIx m) = ixBind (sfoldMap f) (lift m)
 instance SPointed FreeIx where
   slift = FreeIx . return . slift
-instance (forall i j. Functor (f i j), Monad m)
+instance (Silo f, Monad m)
   => Functor (FreeIx f i j m) where
     fmap f (FreeIx m) = FreeIx $ fmap (fmap f) m
-instance (forall i j. Functor (f i j), i ~ j, Monad m)
+instance (Silo f, i ~ j, Monad m)
   => Applicative (FreeIx f i j m) where
     pure = FreeIx . pure . Unwrapped
     (<*>) = ixAp
-instance (forall i j. Functor (f i j), i ~ j, Monad m)
+instance (Silo f, i ~ j, Monad m)
   => Monad (FreeIx f i j m) where
     return = FreeIx . return . Unwrapped
     (>>=) = flip ixBind
-instance (forall i j. Functor (f i j), i ~ j)
+instance (Silo f, i ~ j)
   => MonadTrans (FreeIx f i j) where
     lift = FreeIx . fmap Unwrapped
-instance (forall i j. Functor (f i j))
+instance Silo f
   => IndexedMonadTrans (FreeIx f) where
     ixJoin (FreeIx mm) = FreeIx $ mm >>= \case
       Unwrapped (FreeIx m) -> m
       Wrapped fm -> return $ Wrapped $ fmap ixJoin fm
 instance
-  ( forall i j. Functor (f i j)
+  ( Silo f
   , Monad m
   , i ~ j
   ) => MonadFree (f i j) (FreeIx f i j m) where
