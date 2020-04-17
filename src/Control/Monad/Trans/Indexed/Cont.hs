@@ -17,7 +17,6 @@ module Control.Monad.Trans.Indexed.Cont
   ) where
 
 import Control.Monad.Cont
-import Control.Monad.Trans
 import Control.Monad.Trans.Indexed
 
 newtype ContIx i j m x = ContIx {runContIx :: (x -> m j) -> m i}

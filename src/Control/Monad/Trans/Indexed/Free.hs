@@ -1,5 +1,6 @@
 {-# LANGUAGE
-    DataKinds
+    ConstraintKinds
+  , DataKinds
   , DeriveFunctor
   , FlexibleInstances
   , FunctionalDependencies
@@ -12,65 +13,44 @@
   , StandaloneDeriving
   , UndecidableInstances
 #-}
+{-# OPTIONS_GHC -fno-warn-name-shadowing #-}
 
 module Control.Monad.Trans.Indexed.Free
-  ( IndexedMonadTransFree (..)
-  , liftIxF
-  , FreeIx (..)
-  , FreeIxF (..)
+  ( IxFree
+  , Silo
+  , SFunctor (..)
+  , SPointed (..)
+  , SFoldable (..)
+  , SMonad (..)
   ) where
 
-import Control.Monad.Free
-import Control.Monad.Trans
 import Control.Monad.Trans.Indexed
-import Data.Function ((&))
 
-class IndexedMonadTrans t => IndexedMonadTransFree f t | t -> f where
-  wrapIx :: Monad m => f i j (t j k m x) -> t i k m x
+class
+  ( SFoldable f
+  , SMonad f
+  , forall g. Silo g => IndexedMonadTrans (f g)
+  ) => IxFree f where
 
-liftIxF
-  :: ( forall i j. Functor (f i j)
-     , IndexedMonadTransFree f t
-     , Monad m
-     ) => f i j x -> t i j m x
-liftIxF = wrapIx . fmap return
+type Silo g = forall i j. Functor (g i j)
 
-data FreeIxF f i j m x where
-  PureIx :: x -> FreeIxF f i i m x
-  WrapIx :: f i j (FreeIx f j k m x) -> FreeIxF f i k m x
-instance (forall i j. Functor (f i j), Monad m)
-  => Functor (FreeIxF f i j m) where
-    fmap f = \case
-      PureIx x -> PureIx $ f x
-      WrapIx fm -> WrapIx $ fmap (fmap f) fm
+class SFunctor f where
+  smap
+    :: (Silo g, Silo h, Monad m)
+    => (forall i j x. g i j x -> h i j x)
+    -> f g i j m x -> f h i j m x
 
-newtype FreeIx f i j m x = FreeIx {runFreeIx :: m (FreeIxF f i j m x)}
-instance (forall i j. Functor (f i j), Monad m)
-  => Functor (FreeIx f i j m) where
-    fmap f (FreeIx m) = FreeIx $ fmap (fmap f) m
-instance (forall i j. Functor (f i j), i ~ j, Monad m)
-  => Applicative (FreeIx f i j m) where
-    pure = FreeIx . pure . PureIx
-    (<*>) = ixAp
-instance (forall i j. Functor (f i j), i ~ j, Monad m)
-  => Monad (FreeIx f i j m) where
-    return = FreeIx . return . PureIx
-    (>>=) = flip ixBind
-instance (forall i j. Functor (f i j), i ~ j)
-  => MonadTrans (FreeIx f i j) where
-    lift = FreeIx . fmap PureIx
-instance (forall i j. Functor (f i j))
-  => IndexedMonadTrans (FreeIx f) where
-    ixJoin (FreeIx mm) = FreeIx $ mm >>= \case
-      PureIx (FreeIx m) -> m
-      WrapIx fm -> return $ WrapIx $ fmap ixJoin fm
-instance
-  ( forall i j. Functor (f i j)
-  ) => IndexedMonadTransFree f (FreeIx f) where
-  wrapIx = FreeIx . return . WrapIx
-instance
-  ( forall i j. Functor (f i j)
-  , Monad m
-  , i ~ j
-  ) => MonadFree (f i j) (FreeIx f i j m) where
-    wrap = wrapIx
+class SFunctor f => SPointed f where
+  slift :: (Silo g, Monad m) => g i j x -> f g i j m x
+
+class SFunctor f => SFoldable f where
+  sfoldMap
+    :: (Silo g, IndexedMonadTrans t, Monad m)
+    => (forall i j x. g i j x -> t i j m x)
+    -> f g i j m x -> t i j m x
+
+class SPointed f => SMonad f where
+  sbind
+    :: (Silo g, Silo h, Monad m)
+    => (forall i j x. g i j x -> f h i j m x)
+    -> f g i j m x -> f h i j m x
