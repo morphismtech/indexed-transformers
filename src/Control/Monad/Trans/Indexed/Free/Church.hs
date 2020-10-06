@@ -22,11 +22,11 @@ instance (Silo g, Monad m) => Functor (FreeIx g i j m) where
 instance (Silo f, i ~ j, Monad m)
   => Applicative (FreeIx f i j m) where
     pure x = FreeIx $ const $ pure x
-    (<*>) = undefined
+    (<*>) = ixAp
 instance (Silo f, i ~ j, Monad m)
   => Monad (FreeIx f i j m) where
     return x = FreeIx $ const $ return x
-    (>>=) = undefined
+    (>>=) = flip ixBind
 instance (Silo f, i ~ j)
   => MonadTrans (FreeIx f i j) where
     lift m = FreeIx $ const $ lift m

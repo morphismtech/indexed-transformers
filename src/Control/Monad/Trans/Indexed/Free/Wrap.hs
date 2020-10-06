@@ -7,7 +7,6 @@
   , MultiParamTypeClasses
   , PolyKinds
 #-}
-{-# OPTIONS_GHC -fno-warn-name-shadowing #-}
 
 module Control.Monad.Trans.Indexed.Free.Wrap
   ( FreeIx (..)
