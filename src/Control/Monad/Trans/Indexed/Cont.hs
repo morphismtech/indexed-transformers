@@ -31,7 +31,7 @@ instance i ~ j => Monad (ContIx i j m) where
   ContIx cx >>= k = ContIx $ \ c -> cx (\ x -> runContIx (k x) c)
 instance i ~ j => MonadTrans (ContIx i j) where
   lift = ContIx . (>>=)
-instance Monad m => MonadCont (ContIx i i m) where callCC = callCCIx
+instance (Monad m, i ~ j) => MonadCont (ContIx i j m) where callCC = callCCIx
 
 evalContIx :: Monad m => ContIx x j m j -> m x
 evalContIx c = runContIx c return
