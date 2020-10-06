@@ -1,5 +1,7 @@
 {-# LANGUAGE
-    GADTs
+    FlexibleInstances
+  , GADTs
+  , MultiParamTypeClasses
   , PolyKinds
   , QuantifiedConstraints
   , RankNTypes
@@ -10,6 +12,8 @@ module Control.Monad.Trans.Indexed.Free.Fold
   ( FreeIx (..)
   ) where
 
+import Control.Monad
+import Control.Monad.Free
 import Control.Monad.Trans
 import Control.Monad.Trans.Indexed
 import Control.Monad.Trans.Indexed.Free
@@ -41,4 +45,10 @@ instance SPointed FreeIx where
   slift m = FreeIx $ \k -> k m
 instance SMonad FreeIx where
   sbind = sfoldMap
+instance
+  ( Silo f
+  , Monad m
+  , i ~ j
+  ) => MonadFree (f i j) (FreeIx f i j m) where
+    wrap x = FreeIx $ \k -> sfoldMap k (join (slift x))
 instance IxFree FreeIx

@@ -1,8 +1,10 @@
 {-# LANGUAGE
     DerivingStrategies
+  , FlexibleInstances
   , GADTs
   , GeneralizedNewtypeDeriving
   , LambdaCase
+  , MultiParamTypeClasses
   , QuantifiedConstraints
   , RankNTypes
   , StandaloneDeriving
@@ -14,6 +16,8 @@ module Control.Monad.Trans.Indexed.Free.Lance
   , Lance (..)
   ) where
 
+import Control.Monad
+import Control.Monad.Free
 import Control.Monad.Trans
 import Control.Monad.Trans.Indexed
 import Control.Monad.Trans.Indexed.Free
@@ -57,4 +61,10 @@ instance IndexedMonadTrans (FreeIx f) where
       Wrap.Unwrap x -> runFreeIx (g x)
       Wrap.Wrap (Lance f y) ->
         ixBind (ixAndThen (runFreeIx . g) f) (slift (liftLance y))
+instance
+  ( Silo f
+  , Monad m
+  , i ~ j
+  ) => MonadFree (f i j) (FreeIx f i j m) where
+    wrap = join . slift
 instance IxFree FreeIx
