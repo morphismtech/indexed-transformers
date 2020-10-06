@@ -1,5 +1,6 @@
 {-# LANGUAGE
     ConstraintKinds
+  , GADTs
   , PolyKinds
   , QuantifiedConstraints
   , RankNTypes

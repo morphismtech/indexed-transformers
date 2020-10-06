@@ -14,6 +14,9 @@
 module Control.Monad.Trans.Indexed.Free.Lance
   ( FreeIx (..)
   , Lance (..)
+  , liftLance
+  , mapLance
+  , foldLance
   ) where
 
 import Control.Monad
@@ -62,9 +65,8 @@ instance IndexedMonadTrans (FreeIx f) where
       Wrap.Wrap (Lance f y) ->
         ixBind (ixAndThen (runFreeIx . g) f) (slift (liftLance y))
 instance
-  ( Silo f
-  , Monad m
+  ( Monad m
   , i ~ j
   ) => MonadFree (f i j) (FreeIx f i j m) where
-    wrap = join . slift
+    wrap = join . FreeIx . slift . liftLance
 instance IxFree FreeIx
