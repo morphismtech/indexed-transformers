@@ -15,6 +15,7 @@ module Control.Monad.Trans.Indexed.Free
   , SPointed (..)
   , SFoldable (..)
   , SMonad (..)
+  , toIxFree
   ) where
 
 import Control.Monad.Free
@@ -49,3 +50,8 @@ class SPointed f => SMonad f where
     :: (Silo g, Silo h, Monad m)
     => (forall i j x. g i j x -> f h i j m x)
     -> f g i j m x -> f h i j m x
+
+toIxFree
+  :: (Silo g, Monad m, SFoldable f0, IxFree f1)
+  => f0 g i j m x -> f1 g i j m x 
+toIxFree = sfoldMap slift
