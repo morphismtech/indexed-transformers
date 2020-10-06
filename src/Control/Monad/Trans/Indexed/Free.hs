@@ -16,12 +16,14 @@ module Control.Monad.Trans.Indexed.Free
   , SMonad (..)
   ) where
 
+import Control.Monad.Free
 import Control.Monad.Trans.Indexed
 
 class
   ( SFoldable f
   , SMonad f
   , forall g. Silo g => IndexedMonadTrans (f g)
+  , forall g m i j. (Silo g, Monad m, i ~ j) => MonadFree (g i j) (f g i j m)
   ) => IxFree f where
 
 type Silo g = forall i j. Functor (g i j)
