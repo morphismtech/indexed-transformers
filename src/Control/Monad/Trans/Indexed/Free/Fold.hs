@@ -50,5 +50,5 @@ instance
   , Monad m
   , i ~ j
   ) => MonadFree (f i j) (FreeIx f i j m) where
-    wrap x = FreeIx $ \k -> sfoldMap k (join (slift x))
+    wrap = join . slift
 instance IxFree FreeIx
