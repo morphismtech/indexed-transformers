@@ -6,7 +6,7 @@
 #-}
 {-# OPTIONS_GHC -fno-warn-name-shadowing #-}
 
-module Control.Monad.Trans.Indexed.Free.Church
+module Control.Monad.Trans.Indexed.Free.Fold
   ( FreeIx (..)
   ) where
 
