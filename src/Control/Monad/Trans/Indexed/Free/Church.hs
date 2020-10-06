@@ -30,6 +30,15 @@ instance (Silo f, i ~ j, Monad m)
 instance (Silo f, i ~ j)
   => MonadTrans (FreeIx f i j) where
     lift m = FreeIx $ const $ lift m
--- instance Silo f
---   => IndexedMonadTrans (FreeIx f) where
---     ixJoin (FreeIx k) = FreeIx $ \j -> j _
+instance Silo f
+  => IndexedMonadTrans (FreeIx f) where
+    ixJoin (FreeIx g) = FreeIx $ \k -> ixBind (\(FreeIx f) -> f k) (g k)
+instance SFunctor FreeIx where
+  smap f (FreeIx k) = FreeIx $ \g -> k (g . f)
+instance SFoldable FreeIx where
+  sfoldMap f (FreeIx k) = k f
+instance SPointed FreeIx where
+  slift m = FreeIx $ \k -> k m
+instance SMonad FreeIx where
+  sbind = sfoldMap
+instance IxFree FreeIx
