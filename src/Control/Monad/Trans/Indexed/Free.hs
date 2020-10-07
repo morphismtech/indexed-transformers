@@ -15,7 +15,7 @@ module Control.Monad.Trans.Indexed.Free
   , SPointed (..)
   , SFoldable (..)
   , SMonad (..)
-  , toIxFree
+  , coerceIxFree
   ) where
 
 import Control.Monad.Free
@@ -28,6 +28,31 @@ class
   , forall g m i j. (Silo g, Monad m, i ~ j) => MonadFree (g i j) (f g i j m)
   ) => IxFree f where
 
+{- |
+A `Silo` can be a DSL describing primitive commands like
+[this Conor McBride example]
+(https://stackoverflow.com/questions/28690448/what-is-indexed-monad).
+
+>>> type DVD = String
+>>> :{
+data DVDCommand :: Bool -> Bool -> * -> * where -- Bool is "drive full?"
+  Insert :: x -> DVD -> DVDCommand False True x
+  Eject :: (DVD -> x) -> DVDCommand True False x
+:}
+>>> deriving instance Functor (DVDCommand i j)
+
+`DVDCommand` is a `Silo` which can be lifted to an `IxFree`.
+
+>>> :{
+let
+  insert :: (IxFree free, Monad m) => DVD -> free DVDCommand False True m ()
+  insert dvd = slift (Insert () dvd)
+  eject :: (IxFree free, Monad m) => free DVDCommand True False m DVD
+  eject = slift (Eject id)
+  discSwap :: (IxFree free, Monad m) => DVD -> free DVDCommand True True m DVD
+  discSwap dvd = eject & ixBind (\dvd' -> insert dvd & ixThen (return dvd'))
+:}
+-}
 type Silo g = forall i j. Functor (g i j)
 
 class SFunctor f where
@@ -51,7 +76,7 @@ class SPointed f => SMonad f where
     => (forall i j x. g i j x -> f h i j m x)
     -> f g i j m x -> f h i j m x
 
-toIxFree
-  :: (Silo g, Monad m, SFoldable f0, IxFree f1)
+coerceIxFree
+  :: (IxFree f0, IxFree f1, Silo g, Monad m)
   => f0 g i j m x -> f1 g i j m x 
-toIxFree = sfoldMap slift
+coerceIxFree = sfoldMap slift
