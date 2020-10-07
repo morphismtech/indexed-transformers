@@ -43,8 +43,7 @@ instance SFoldable FreeIx where
   sfoldMap f (FreeIx k) = k f
 instance SPointed FreeIx where
   slift m = FreeIx $ \k -> k m
-instance SMonad FreeIx where
-  sbind = sfoldMap
+instance SMonad FreeIx
 instance
   ( Silo f
   , Monad m

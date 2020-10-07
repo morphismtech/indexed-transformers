@@ -44,8 +44,7 @@ instance SFoldable FreeIx where
   sfoldMap f (FreeIx m) = ixBind (sfoldMap f) (lift m)
 instance SPointed FreeIx where
   slift = FreeIx . return . slift
-instance SMonad FreeIx where
-  sbind = sfoldMap
+instance SMonad FreeIx
 instance (Silo f, Monad m)
   => Functor (FreeIx f i j m) where
     fmap f (FreeIx m) = FreeIx $ fmap (fmap f) m

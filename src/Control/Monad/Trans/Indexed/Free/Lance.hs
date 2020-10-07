@@ -48,8 +48,7 @@ instance SFoldable FreeIx where
   sfoldMap f (FreeIx wrapped) = sfoldMap (foldLance f) wrapped
 instance SPointed FreeIx where
   slift = FreeIx . slift . liftLance
-instance SMonad FreeIx where
-  sbind = sfoldMap
+instance SMonad FreeIx
 instance (i ~ j, Monad m) => Applicative (FreeIx f i j m) where
   pure = FreeIx . Wrap.FreeIx . return . Wrap.Unwrap
   (<*>) = ixAp

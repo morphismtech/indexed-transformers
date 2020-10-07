@@ -1,5 +1,6 @@
 {-# LANGUAGE
     ConstraintKinds
+  , DefaultSignatures
   , GADTs
   , PolyKinds
   , QuantifiedConstraints
@@ -75,6 +76,12 @@ class SPointed f => SMonad f where
     :: (Silo g, Silo h, Monad m)
     => (forall i j x. g i j x -> f h i j m x)
     -> f g i j m x -> f h i j m x
+  default sbind
+    :: IxFree f
+    => (Silo g, Silo h, Monad m)
+    => (forall i j x. g i j x -> f h i j m x)
+    -> f g i j m x -> f h i j m x
+  sbind = sfoldMap
 
 coerceIxFree
   :: (IxFree f0, IxFree f1, Silo g, Monad m)
