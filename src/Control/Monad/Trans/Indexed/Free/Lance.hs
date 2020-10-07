@@ -15,6 +15,7 @@ module Control.Monad.Trans.Indexed.Free.Lance
   ( FreeIx (..)
   , Lance (..)
   , liftLance
+  , lowerLance
   , mapLance
   , foldLance
   ) where
@@ -39,6 +40,8 @@ foldLance
 foldLance g (Lance f x) = g (fmap f x)
 liftLance :: g i j x -> Lance g i j x
 liftLance = Lance id
+lowerLance :: Silo g => Lance g i j x -> g i j x
+lowerLance (Lance f x) = fmap f x
 
 newtype FreeIx f i j m x = FreeIx {runFreeIx :: Wrap.FreeIx (Lance f) i j m x}
 deriving newtype instance Monad m => Functor (FreeIx f i j m)
