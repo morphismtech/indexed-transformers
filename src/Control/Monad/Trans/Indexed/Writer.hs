@@ -22,7 +22,6 @@ import Prelude hiding (id, (.))
 import Control.Category
 import Control.Monad.Trans
 import Control.Monad.Trans.Indexed
-import Control.Monad.Writer
 
 newtype WriterIx w i j m x = WriterIx {runWriterIx :: m (x, w i j)}
   deriving Functor

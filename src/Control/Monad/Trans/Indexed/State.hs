@@ -17,7 +17,6 @@ module Control.Monad.Trans.Indexed.State
   ) where
 
 import Control.Monad.State
-import Control.Monad.Trans
 import Control.Monad.Trans.Indexed
 
 newtype StateIx i j m x = StateIx { runStateIx :: i -> m (x, j)}

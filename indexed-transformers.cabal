@@ -24,6 +24,9 @@ library
       Control.Monad.Trans.Indexed
       Control.Monad.Trans.Indexed.Cont
       Control.Monad.Trans.Indexed.Free
+      Control.Monad.Trans.Indexed.Free.Fold
+      Control.Monad.Trans.Indexed.Free.Lance
+      Control.Monad.Trans.Indexed.Free.Wrap
       Control.Monad.Trans.Indexed.State
       Control.Monad.Trans.Indexed.Writer
   hs-source-dirs:
@@ -34,3 +37,4 @@ library
     , mtl
     , transformers
   default-language: Haskell2010
+  ghc-options: -Wall
