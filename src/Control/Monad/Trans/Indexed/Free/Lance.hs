@@ -38,7 +38,7 @@ foldLance
   -> Lance g i j x -> t i j m x
 foldLance g (Lance f x) = g (fmap f x)
 liftLance :: g i j x -> Lance g i j x
-liftLance x = Lance id x
+liftLance = Lance id
 
 newtype FreeIx f i j m x = FreeIx {runFreeIx :: Wrap.FreeIx (Lance f) i j m x}
 deriving newtype instance Monad m => Functor (FreeIx f i j m)
