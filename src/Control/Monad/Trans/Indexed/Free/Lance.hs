@@ -48,7 +48,7 @@ deriving newtype instance Monad m => Functor (FreeIx f i j m)
 instance SFunctor FreeIx where
   smap f (FreeIx wrapped) = FreeIx (smap (mapLance f) wrapped)
 instance SFoldable FreeIx where
-  sfoldMap f (FreeIx wrapped) = sfoldMap (foldLance f) wrapped
+  sfoldMap f (FreeIx wrapped) = sfoldMap (f . lowerLance) wrapped
 instance SPointed FreeIx where
   slift = FreeIx . slift . liftLance
 instance SMonad FreeIx where
@@ -63,10 +63,10 @@ instance i ~ j => MonadTrans (FreeIx f i j) where
   lift = FreeIx . Wrap.FreeIx . fmap Wrap.Unwrap
 instance IndexedMonadTrans (FreeIx f) where
   ixBind g (FreeIx (Wrap.FreeIx m)) = do
-    FreeIx . Wrap.FreeIx $ m >>= Wrap.runFreeIx . \case
-      Wrap.Unwrap x -> runFreeIx (g x)
-      Wrap.Wrap (Lance f y) ->
-        ixBind (ixAndThen (runFreeIx . g) f) (slift (liftLance y))
+    FreeIx . Wrap.FreeIx $ m >>= \case
+      Wrap.Unwrap x -> Wrap.runFreeIx (runFreeIx (g x))
+      Wrap.Wrap (Lance f y) -> return $
+        Wrap.Wrap (Lance (ixAndThen (runFreeIx . g) f) y)
 instance
   ( Monad m
   , i ~ j
