@@ -62,11 +62,11 @@ instance (i ~ j, Monad m) => Monad (FreeIx f i j m) where
 instance i ~ j => MonadTrans (FreeIx f i j) where
   lift = FreeIx . Wrap.FreeIx . fmap Wrap.Unwrap
 instance IndexedMonadTrans (FreeIx f) where
-  ixBind g (FreeIx (Wrap.FreeIx m)) = do
+  ixJoin (FreeIx (Wrap.FreeIx m)) =
     FreeIx . Wrap.FreeIx $ m >>= \case
-      Wrap.Unwrap x -> Wrap.runFreeIx (runFreeIx (g x))
-      Wrap.Wrap (Lance f y) -> return $
-        Wrap.Wrap (Lance (ixAndThen (runFreeIx . g) f) y)
+      Wrap.Unwrap y -> Wrap.runFreeIx (runFreeIx y)
+      Wrap.Wrap (Lance f x) -> return $
+        Wrap.Wrap (Lance (ixAndThen runFreeIx f) x)
 instance
   ( Monad m
   , i ~ j
