@@ -30,6 +30,8 @@ library
       Control.Monad.Trans.Indexed.Free.Wrap
       Control.Monad.Trans.Indexed.State
       Control.Monad.Trans.Indexed.Writer
+      Data.Silo
+      Data.Silo.Functor
   hs-source-dirs:
       src
   build-depends:
