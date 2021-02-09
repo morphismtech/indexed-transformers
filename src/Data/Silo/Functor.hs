@@ -1,5 +1,7 @@
 {-# LANGUAGE
-    QuantifiedConstraints
+    DefaultSignatures
+  , PolyKinds
+  , QuantifiedConstraints
   , RankNTypes
 #-}
 {-# OPTIONS_GHC -fno-warn-name-shadowing #-}
@@ -34,3 +36,8 @@ class SPointed f => SMonad f where
     :: (Silo g, Silo h, Monad m)
     => (forall i j x. g i j x -> f h i j m x)
     -> f g i j m x -> f h i j m x
+  default sbind
+    :: (Silo g, Silo h, IndexedMonadTrans (f h), Monad m, SFoldable f)
+    => (forall i j x. g i j x -> f h i j m x)
+    -> f g i j m x -> f h i j m x
+  sbind = sfoldMap

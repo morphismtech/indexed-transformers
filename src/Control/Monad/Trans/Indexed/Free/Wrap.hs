@@ -17,6 +17,8 @@ import Control.Monad.Free
 import Control.Monad.Trans
 import Control.Monad.Trans.Indexed
 import Control.Monad.Trans.Indexed.Free
+import Data.Silo
+import Data.Silo.Functor
 
 data WrapIx f i j m x where
   Unwrap :: x -> WrapIx f i i m x

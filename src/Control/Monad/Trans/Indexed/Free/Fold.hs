@@ -5,6 +5,7 @@
   , PolyKinds
   , QuantifiedConstraints
   , RankNTypes
+  , TypeApplications
 #-}
 {-# OPTIONS_GHC -fno-warn-name-shadowing #-}
 
@@ -17,6 +18,8 @@ import Control.Monad.Free
 import Control.Monad.Trans
 import Control.Monad.Trans.Indexed
 import Control.Monad.Trans.Indexed.Free
+import Data.Silo
+import Data.Silo.Functor
 
 newtype FreeIx g i j m x = FreeIx
   {runFreeIx :: forall t. (IndexedMonadTrans t, Monad m)

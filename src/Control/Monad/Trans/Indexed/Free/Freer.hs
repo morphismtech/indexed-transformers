@@ -11,13 +11,8 @@
 #-}
 {-# OPTIONS_GHC -fno-warn-name-shadowing #-}
 
-module Control.Monad.Trans.Indexed.Free.Lance
+module Control.Monad.Trans.Indexed.Free.Freer
   ( FreeIx (..)
-  , Lance (..)
-  , liftLance
-  , lowerLance
-  , mapLance
-  , foldLance
   ) where
 
 import Control.Monad
@@ -25,23 +20,10 @@ import Control.Monad.Free
 import Control.Monad.Trans
 import Control.Monad.Trans.Indexed
 import Control.Monad.Trans.Indexed.Free
-import qualified Control.Monad.Trans.Indexed.Free.Wrap as Wrap
+import Data.Silo
+import Data.Silo.Functor
 
-data Lance f i j x where
-  Lance :: (x -> y) -> f i j x -> Lance f i j y
-instance Functor (Lance f i j) where
-  fmap g (Lance f x) = Lance (g . f) x
-mapLance :: (forall x. f i j x -> g i j x) -> Lance f i j x -> Lance g i j x
-mapLance g (Lance f x) = Lance f (g x)
-foldLance
-  :: (IndexedMonadTrans t, Monad m, Silo g)
-  => (forall x. g i j x -> t i j m x)
-  -> Lance g i j x -> t i j m x
-foldLance g (Lance f x) = g (fmap f x)
-liftLance :: g i j x -> Lance g i j x
-liftLance = Lance id
-lowerLance :: Silo g => Lance g i j x -> g i j x
-lowerLance (Lance f x) = fmap f x
+import qualified Control.Monad.Trans.Indexed.Free.Wrap as Wrap
 
 newtype FreeIx f i j m x = FreeIx {runFreeIx :: Wrap.FreeIx (Lance f) i j m x}
 deriving newtype instance Monad m => Functor (FreeIx f i j m)
