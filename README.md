@@ -6,7 +6,7 @@ An indexed monad transformer transforms a `Monad` into an indexed monad.
 
 This library provides
   - a typeclass for indexed monad transformers
-  - qualified @do@ notation to use with them
+  - qualified do notation to use with them
   - and instances for the
     - free indexed monad transformer
     - continuation indexed monad transformer
