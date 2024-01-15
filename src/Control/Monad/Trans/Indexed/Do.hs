@@ -1,3 +1,7 @@
+{-|
+>>> :set -XQualifiedDo
+>>> import qualified Control.Monad.Trans.Indexed.Do as Indexed
+-}
 module Control.Monad.Trans.Indexed.Do
   ( (>>=)
   , (>>)
