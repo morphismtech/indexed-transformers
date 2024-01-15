@@ -99,6 +99,7 @@ class
 
 {- |
 prop> coerceFreeIx = foldFreeIx liftFreeIx
+prop> id = coerceFreeIx . coerceFreeIx
 -}
 coerceFreeIx
   :: (IxMonadTransFree freeIx0, IxMonadTransFree freeIx1, IxFunctor f, Monad m)
