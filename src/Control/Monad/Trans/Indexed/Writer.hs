@@ -1,11 +1,3 @@
-{-# LANGUAGE
-    DeriveFunctor
-  , FlexibleInstances
-  , GADTs
-  , MultiParamTypeClasses
-  , PolyKinds
-#-}
-
 module Control.Monad.Trans.Indexed.Writer
   ( WriterIx (..)
   , evalWriterIx

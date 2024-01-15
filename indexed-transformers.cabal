@@ -40,10 +40,17 @@ library
   hs-source-dirs:
       src
   default-extensions:
+      ConstraintKinds
+      DeriveFunctor
+      FlexibleInstances
+      GADTs
+      LambdaCase
+      MultiParamTypeClasses
       PolyKinds
       QuantifiedConstraints
       RankNTypes
       StandaloneKindSignatures
+      TupleSections
       TypeOperators
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:

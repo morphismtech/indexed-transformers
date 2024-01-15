@@ -1,12 +1,3 @@
-{-# LANGUAGE
-    FlexibleInstances
-  , GADTs
-  , MultiParamTypeClasses
-  , PolyKinds
-  , QuantifiedConstraints
-  , RankNTypes
-  , TypeApplications
-#-}
 {-# OPTIONS_GHC -fno-warn-name-shadowing #-}
 
 module Control.Monad.Trans.Indexed.Free.Fold

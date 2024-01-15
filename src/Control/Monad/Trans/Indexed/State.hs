@@ -1,11 +1,3 @@
-{-# LANGUAGE
-    DeriveFunctor
-  , FlexibleInstances
-  , GADTs
-  , MultiParamTypeClasses
-  , TupleSections
-#-}
-
 module Control.Monad.Trans.Indexed.State
   ( StateIx (..)
   , evalStateIx

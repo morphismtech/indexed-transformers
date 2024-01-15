@@ -1,12 +1,4 @@
-{-# LANGUAGE
-    ConstraintKinds
-  , DefaultSignatures
-  , GADTs
-  , PolyKinds
-  , QuantifiedConstraints
-  , RankNTypes
-  , UndecidableInstances
-#-}
+{-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -fno-warn-name-shadowing #-}
 
 module Control.Monad.Trans.Indexed.Free

@@ -31,10 +31,17 @@ ghc-options:
 - -Wredundant-constraints
 
 default-extensions:
+- ConstraintKinds
+- DeriveFunctor
+- FlexibleInstances
+- GADTs
+- LambdaCase
+- MultiParamTypeClasses
 - PolyKinds
 - QuantifiedConstraints
 - RankNTypes
 - StandaloneKindSignatures
+- TupleSections
 - TypeOperators
 
 library:

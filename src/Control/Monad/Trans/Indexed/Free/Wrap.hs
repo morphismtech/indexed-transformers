@@ -1,13 +1,3 @@
-{-# LANGUAGE
-    ConstraintKinds
-  , FlexibleInstances
-  , GADTs
-  , LambdaCase
-  , QuantifiedConstraints
-  , MultiParamTypeClasses
-  , PolyKinds
-#-}
-
 module Control.Monad.Trans.Indexed.Free.Wrap
   ( FreeIx (..)
   , WrapIx (..)

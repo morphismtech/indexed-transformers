@@ -1,9 +1,3 @@
-{-# LANGUAGE
-    DeriveFunctor
-  , FlexibleInstances
-  , GADTs
-#-}
-
 module Control.Monad.Trans.Indexed.Cont
   ( ContIx (..)
   , callCCIx
