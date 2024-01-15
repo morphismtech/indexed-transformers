@@ -21,7 +21,7 @@ import Control.Monad.Trans.Indexed
 
 newtype StateIx i j m x = StateIx { runStateIx :: i -> m (x, j)}
   deriving Functor
-instance IndexedMonadTrans StateIx where
+instance IxMonadTrans StateIx where
   joinIx (StateIx f) = StateIx $ \i -> do
     (StateIx g, j) <- f i
     g j

@@ -15,21 +15,21 @@ import qualified Control.Monad.Trans.Indexed as Ix
 import Prelude hiding ((>>=), (>>), fail)
 
 (>>=)
-  :: (Ix.IndexedMonadTrans t, M.Monad m)
+  :: (Ix.IxMonadTrans t, M.Monad m)
   => t i j m x
   -> (x -> t j k m y)
   -> t i k m y
 (>>=) = flip Ix.bindIx
 
 (>>)
-  :: (Ix.IndexedMonadTrans t, M.Monad m)
+  :: (Ix.IxMonadTrans t, M.Monad m)
   => t i j m x
   -> t j k m y
   -> t i k m y
 (>>) = flip Ix.thenIx
 
 fail
-  :: (Ix.IndexedMonadTrans t, M.MonadFail m, i ~ j)
+  :: (Ix.IxMonadTrans t, M.MonadFail m, i ~ j)
   => String
   -> t i j m x
 fail = T.lift . M.fail

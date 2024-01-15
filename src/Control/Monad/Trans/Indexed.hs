@@ -1,5 +1,5 @@
 module Control.Monad.Trans.Indexed
-  ( IndexedMonadTrans (..)
+  ( IxMonadTrans (..)
   , Indexed (..)
   , (&)
   ) where
@@ -24,14 +24,14 @@ even if the source and target index are different.
 >>> :set -XQualifiedDo
 >>> import qualified Control.Monad.Trans.Indexed.Do as Indexed
 -}
-type IndexedMonadTrans
+type IxMonadTrans
   :: (k -> k -> (Type -> Type) -> Type -> Type)
   -> Constraint
 class
   ( forall i j m. Monad m => Functor (t i j m)
   , forall i j m. (i ~ j, Monad m) => Monad (t i j m)
   , forall i j. i ~ j => MonadTrans (t i j)
-  ) => IndexedMonadTrans t where
+  ) => IxMonadTrans t where
 
   {-# MINIMAL joinIx | bindIx #-}
 
@@ -90,11 +90,11 @@ class
     -> x -> t i k m z
   andThenIx g f x = bindIx g (f x)
 
-{- | `Indexed` reshuffles the type parameters of an `IndexedMonadTrans`,
+{- | `Indexed` reshuffles the type parameters of an `IxMonadTrans`,
 exposing its `Category` instance.-}
 newtype Indexed t m r i j = Indexed {runIndexed :: t i j m r}
 instance
-  ( IndexedMonadTrans t
+  ( IxMonadTrans t
   , Monad m
   , Monoid r
   ) => Category (Indexed t m r) where

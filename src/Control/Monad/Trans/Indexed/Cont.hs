@@ -22,7 +22,7 @@ import Control.Monad.Trans.Indexed
 
 newtype ContIx i j m x = ContIx {runContIx :: (x -> m j) -> m i}
   deriving Functor
-instance IndexedMonadTrans ContIx where
+instance IxMonadTrans ContIx where
   joinIx (ContIx k) = ContIx $ \f -> k $ \(ContIx g) -> g f
 instance i ~ j => Applicative (ContIx i j m) where
   pure x = ContIx $ \k -> k x

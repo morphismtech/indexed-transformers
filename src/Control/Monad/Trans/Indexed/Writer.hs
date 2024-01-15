@@ -26,7 +26,7 @@ import Control.Monad.Trans.Indexed
 newtype WriterIx w i j m x = WriterIx {runWriterIx :: m (x, w i j)}
   deriving Functor
 
-instance Category w => IndexedMonadTrans (WriterIx w) where
+instance Category w => IxMonadTrans (WriterIx w) where
   joinIx (WriterIx mm) = WriterIx $ do
     (WriterIx m, ij) <- mm
     (x, jk) <- m

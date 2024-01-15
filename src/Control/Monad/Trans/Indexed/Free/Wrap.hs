@@ -43,7 +43,7 @@ instance (IxFunctor f, i ~ j)
   => MonadTrans (FreeIx f i j) where
     lift = FreeIx . fmap Unwrap
 instance IxFunctor f
-  => IndexedMonadTrans (FreeIx f) where
+  => IxMonadTrans (FreeIx f) where
     joinIx (FreeIx mm) = FreeIx $ mm >>= \case
       Unwrap (FreeIx m) -> m
       Wrap fm -> return $ Wrap $ fmap joinIx fm
@@ -53,15 +53,15 @@ instance
   , i ~ j
   ) => MonadFree (f i j) (FreeIx f i j m) where
     wrap = FreeIx . return . Wrap
-instance IxFree FreeIx where
-  liftIxFree = FreeIx . return . Wrap . fmap return
-  hoistIxFree f (FreeIx m) = FreeIx (fmap hoist_f m)
+instance IxMonadTransFree FreeIx where
+  liftFreeIx = FreeIx . return . Wrap . fmap return
+  hoistFreeIx f (FreeIx m) = FreeIx (fmap hoist_f m)
     where
       hoist_f = \case
         Unwrap x -> Unwrap x
-        Wrap y -> Wrap (f (fmap (hoistIxFree f) y))
-  runIxFree f (FreeIx m) = bindIx foldMap_f (lift m)
+        Wrap y -> Wrap (f (fmap (hoistFreeIx f) y))
+  foldFreeIx f (FreeIx m) = bindIx foldMap_f (lift m)
     where
       foldMap_f = \case
         Unwrap x -> return x
-        Wrap y -> bindIx (runIxFree f) (f y)
+        Wrap y -> bindIx (foldFreeIx f) (f y)
