@@ -30,12 +30,9 @@ library
       Control.Monad.Trans.Indexed.Do
       Control.Monad.Trans.Indexed.Free
       Control.Monad.Trans.Indexed.Free.Fold
-      Control.Monad.Trans.Indexed.Free.Freer
       Control.Monad.Trans.Indexed.Free.Wrap
       Control.Monad.Trans.Indexed.State
       Control.Monad.Trans.Indexed.Writer
-      Data.Silo
-      Data.Silo.Functor
   other-modules:
       Paths_indexed_transformers
   autogen-modules:
@@ -43,6 +40,10 @@ library
   hs-source-dirs:
       src
   default-extensions:
+      PolyKinds
+      QuantifiedConstraints
+      RankNTypes
+      StandaloneKindSignatures
       TypeOperators
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:

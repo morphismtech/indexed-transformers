@@ -31,6 +31,10 @@ ghc-options:
 - -Wredundant-constraints
 
 default-extensions:
+- PolyKinds
+- QuantifiedConstraints
+- RankNTypes
+- StandaloneKindSignatures
 - TypeOperators
 
 library:
