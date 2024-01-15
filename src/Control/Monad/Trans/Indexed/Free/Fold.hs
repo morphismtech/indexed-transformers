@@ -32,7 +32,7 @@ instance (Silo f, i ~ j, Monad m)
     (<*>) = ixAp
 instance (Silo f, i ~ j, Monad m)
   => Monad (FreeIx f i j m) where
-    return x = FreeIx $ const $ return x
+    return = pure
     (>>=) = flip ixBind
 instance (Silo f, i ~ j)
   => MonadTrans (FreeIx f i j) where

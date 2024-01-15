@@ -1,0 +1,37 @@
+name:                indexed-transformers
+version:             0.1.0.0
+github:              "morphismtech/indexed-transformers"
+license:             BSD-3-Clause
+author:              "Eitan Chatav"
+maintainer:          "eitan@morphism.tech"
+copyright:           "2024 Eitan Chatav"
+
+extra-source-files:
+- README.md
+- CHANGELOG.md
+
+
+description: Please see the README on GitHub at <https://github.com/morphismtech/indexed-transformers#readme>
+
+dependencies:
+- base >= 4.7 && < 5
+- free
+- mtl
+- transformers
+
+ghc-options:
+- -Wall
+- -Wcompat
+- -Widentities
+- -Wincomplete-record-updates
+- -Wincomplete-uni-patterns
+- -Wmissing-export-lists
+- -Wmissing-home-modules
+- -Wpartial-fields
+- -Wredundant-constraints
+
+default-extensions:
+- TypeOperators
+
+library:
+  source-dirs: src

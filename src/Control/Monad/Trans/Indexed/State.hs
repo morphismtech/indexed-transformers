@@ -29,7 +29,7 @@ instance (i ~ j, Monad m) => Applicative (StateIx i j m) where
   pure x = StateIx $ \i -> pure (x, i)
   (<*>) = ixAp
 instance (i ~ j, Monad m) => Monad (StateIx i j m) where
-  return x = StateIx $ \i -> return (x, i)
+  return = pure
   (>>=) = flip ixBind
 instance i ~ j => MonadTrans (StateIx i j) where
   lift m = StateIx $ \i -> (, i) <$> m

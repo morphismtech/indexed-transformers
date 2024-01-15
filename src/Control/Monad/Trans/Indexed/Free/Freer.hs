@@ -38,7 +38,7 @@ instance (i ~ j, Monad m) => Applicative (FreeIx f i j m) where
   pure = FreeIx . Wrap.FreeIx . return . Wrap.Unwrap
   (<*>) = ixAp
 instance (i ~ j, Monad m) => Monad (FreeIx f i j m) where
-  return = FreeIx . Wrap.FreeIx . return . Wrap.Unwrap
+  return = pure
   (>>=) = flip ixBind
 instance i ~ j => MonadTrans (FreeIx f i j) where
   lift = FreeIx . Wrap.FreeIx . fmap Wrap.Unwrap

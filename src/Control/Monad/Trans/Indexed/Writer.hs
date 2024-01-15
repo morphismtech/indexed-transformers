@@ -39,7 +39,7 @@ instance (i ~ j, Applicative m, Category w) => Applicative (WriterIx w i j m) wh
     in
       WriterIx $ apply <$> mf <*> mx
 instance (i ~ j, Monad m, Category w) => Monad (WriterIx w i j m) where
-  return x = WriterIx (return (x, id))
+  return = pure
   (>>=) = flip ixBind
 instance (i ~ j, Category w) => MonadTrans (WriterIx w i j) where
   lift m = WriterIx $ do

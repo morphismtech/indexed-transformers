@@ -56,7 +56,7 @@ instance (Silo f, i ~ j, Monad m)
     (<*>) = ixAp
 instance (Silo f, i ~ j, Monad m)
   => Monad (FreeIx f i j m) where
-    return = FreeIx . return . Unwrap
+    return = pure
     (>>=) = flip ixBind
 instance (Silo f, i ~ j)
   => MonadTrans (FreeIx f i j) where
