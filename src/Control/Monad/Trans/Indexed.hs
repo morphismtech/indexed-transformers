@@ -1,6 +1,7 @@
 module Control.Monad.Trans.Indexed
   ( IndexedMonadTrans (..)
   , Indexed (..)
+  , (&)
   ) where
 
 import Control.Category (Category (..))
@@ -14,9 +15,14 @@ import Prelude hiding (id, (.))
 (https://bentnib.org/paramnotions-jfp.pdf)
 is a `Functor` [enriched category]
 (https://ncatlab.org/nlab/show/enriched+category).
-An indexed monad transformer transforms a `Monad` into an indexed monad,
-and is a monad transformer when its source and target are the same,
-enabling use of standard @do@ notation for endo-index operations.
+An indexed monad transformer transforms a `Monad` into an indexed monad.
+It is a monad and monad transformer when its source and target index
+are the same, enabling use of standard @do@ notation in that case.
+In the general case, qualified @Indexed.do@ notation can be used,
+even if the source and target index are different.
+
+>>> :set -XQualifiedDo
+>>> import qualified Control.Monad.Trans.Indexed.Do as Indexed
 -}
 type IndexedMonadTrans
   :: (k -> k -> (Type -> Type) -> Type -> Type)
@@ -29,7 +35,9 @@ class
 
   {-# MINIMAL joinIx | bindIx #-}
 
-  -- | indexed analog of `<*>`
+  {- | indexed analog of `<*>`
+  prop> (<*>) = apIx
+  -}
   apIx
     :: Monad m
     => t i j m (x -> y)
@@ -37,14 +45,20 @@ class
     -> t i k m y
   apIx tf tx = bindIx (<$> tx) tf
 
-  -- | indexed analog of `join`
+  {- | indexed analog of `join`
+  prop> join = joinIx
+  prop> joinIx = bindIx id
+  -}
   joinIx
     :: Monad m
     => t i j m (t j k m y)
     -> t i k m y
-  joinIx t = t & bindIx id
+  joinIx = bindIx id
 
-  -- | indexed analog of `=<<`
+  {- | indexed analog of `=<<`
+  prop> (=<<) = bindIx
+  prop> bindIx f x = joinIx (f <$> x)
+  -}
   bindIx
     :: Monad m
     => (x -> t j k m y)
@@ -52,7 +66,9 @@ class
     -> t i k m y
   bindIx f t = joinIx (f <$> t)
 
-  -- | indexed analog of flipped `>>`
+  {- | indexed analog of flipped `>>`
+  prop> return () & thenIx y = y
+  -}
   thenIx
     :: Monad m
     => t j k m y
@@ -60,7 +76,13 @@ class
     -> t i k m y
   thenIx ix2 ix1 = ix1 & bindIx (\ _ -> ix2)
 
-  -- | indexed analog of `<=<`
+  {- | indexed analog of `<=<`
+  prop> (<=<) = andThenIx
+  prop> andThenIx g f x = bindIx g (f x)
+  prop> f & andThen return = f
+  prop> return & andThen f = f
+  prop> f & andThenIx g & andThenIx h = f & andThenIx (g & andThenIx h)
+  -}
   andThenIx
     :: Monad m
     => (y -> t j k m z)
