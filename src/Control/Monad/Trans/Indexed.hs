@@ -102,8 +102,8 @@ class
 
   prop> (<=<) = andThenIx
   prop> andThenIx g f x = bindIx g (f x)
-  prop> f & andThen return = f
-  prop> return & andThen f = f
+  prop> f & andThenIx return = f
+  prop> return & andThenIx f = f
   prop> f & andThenIx g & andThenIx h = f & andThenIx (g & andThenIx h)
   -}
   andThenIx
