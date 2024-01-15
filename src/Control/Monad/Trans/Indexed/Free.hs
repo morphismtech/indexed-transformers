@@ -68,6 +68,15 @@ swap dvd = Indexed.do
   return dvd'
 :}
 
+>>> import Control.Monad.Trans
+>>> :{
+printDVD :: IxFree free => free (IxMap DVDCommand) 'True 'True IO ()
+printDVD = Indexed.do
+  dvd <- eject
+  insert dvd
+  lift $ putStrLn dvd
+:}
+
 -}
 class
   ( forall f. IxFunctor f => IndexedMonadTrans (free f)
