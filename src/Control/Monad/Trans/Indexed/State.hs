@@ -1,3 +1,12 @@
+{- |
+Module      :  Control.Monad.Trans.Indexed.State
+Copyright   :  (C) 2024 Eitan Chatav
+License     :  BSD 3-Clause License (see the file LICENSE)
+Maintainer  :  Eitan Chatav <eitan.chatav@gmail.com>
+
+The state indexed monad transformer.
+-}
+
 module Control.Monad.Trans.Indexed.State
   ( StateIx (..)
   , evalStateIx

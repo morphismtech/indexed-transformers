@@ -1,3 +1,12 @@
+{- |
+Module      :  Control.Monad.Trans.Indexed.Free.Wrap
+Copyright   :  (C) 2024 Eitan Chatav
+License     :  BSD 3-Clause License (see the file LICENSE)
+Maintainer  :  Eitan Chatav <eitan.chatav@gmail.com>
+
+An instance of the free indexed monad transformer.
+-}
+
 module Control.Monad.Trans.Indexed.Free.Wrap
   ( FreeIx (..)
   , WrapIx (..)

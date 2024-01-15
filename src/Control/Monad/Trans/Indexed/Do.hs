@@ -1,7 +1,15 @@
-{-|
+{- |
+Module      :  Control.Monad.Trans.Indexed.Do
+Copyright   :  (C) 2024 Eitan Chatav
+License     :  BSD 3-Clause License (see the file LICENSE)
+Maintainer  :  Eitan Chatav <eitan.chatav@gmail.com>
+
+Qualified @Indexed.do@ notation.
+
 >>> :set -XQualifiedDo
 >>> import qualified Control.Monad.Trans.Indexed.Do as Indexed
 -}
+
 module Control.Monad.Trans.Indexed.Do
   ( (>>=)
   , (>>)

@@ -1,3 +1,12 @@
+{- |
+Module      :  Control.Monad.Trans.Indexed
+Copyright   :  (C) 2024 Eitan Chatav
+License     :  BSD 3-Clause License (see the file LICENSE)
+Maintainer  :  Eitan Chatav <eitan.chatav@gmail.com>
+
+Indexed monad transformers.
+-}
+
 module Control.Monad.Trans.Indexed
   ( IxMonadTrans (..)
   , Indexed (..)
@@ -11,7 +20,8 @@ import Data.Function ((&))
 import Data.Kind
 import Prelude hiding (id, (.))
 
-{- | An [Atkey indexed monad]
+{- |
+An [Atkey indexed monad]
 (https://bentnib.org/paramnotions-jfp.pdf)
 is a `Functor` [enriched category]
 (https://ncatlab.org/nlab/show/enriched+category).
@@ -35,7 +45,9 @@ class
 
   {-# MINIMAL joinIx | bindIx #-}
 
-  {- | indexed analog of `<*>`
+  {- |
+  indexed analog of `<*>`
+
   prop> (<*>) = apIx
   -}
   apIx
@@ -45,7 +57,9 @@ class
     -> t i k m y
   apIx tf tx = bindIx (<$> tx) tf
 
-  {- | indexed analog of `join`
+  {- |
+  indexed analog of `join`
+
   prop> join = joinIx
   prop> joinIx = bindIx id
   -}
@@ -55,9 +69,13 @@ class
     -> t i k m y
   joinIx = bindIx id
 
-  {- | indexed analog of `=<<`
+  {- |
+  indexed analog of `=<<`
+
   prop> (=<<) = bindIx
   prop> bindIx f x = joinIx (f <$> x)
+  prop> x & bindIx return = x
+  prop> x & bindIx f & bindIx g = x & bindIx (f & andThenIx g)
   -}
   bindIx
     :: Monad m
@@ -66,7 +84,10 @@ class
     -> t i k m y
   bindIx f t = joinIx (f <$> t)
 
-  {- | indexed analog of flipped `>>`
+  {- |
+  indexed analog of flipped `>>`
+
+  prop> (>>) = flip thenIx
   prop> return () & thenIx y = y
   -}
   thenIx
@@ -76,7 +97,9 @@ class
     -> t i k m y
   thenIx ix2 ix1 = ix1 & bindIx (\ _ -> ix2)
 
-  {- | indexed analog of `<=<`
+  {- |
+  indexed analog of `<=<`
+
   prop> (<=<) = andThenIx
   prop> andThenIx g f x = bindIx g (f x)
   prop> f & andThen return = f
@@ -90,8 +113,10 @@ class
     -> x -> t i k m z
   andThenIx g f x = bindIx g (f x)
 
-{- | `Indexed` reshuffles the type parameters of an `IxMonadTrans`,
-exposing its `Category` instance.-}
+{- |
+`Indexed` reshuffles the type parameters of an `IxMonadTrans`,
+exposing its `Category` instance.
+-}
 newtype Indexed t m r i j = Indexed {runIndexed :: t i j m r}
 instance
   ( IxMonadTrans t

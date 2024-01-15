@@ -5,11 +5,12 @@ license:             BSD-3-Clause
 author:              "Eitan Chatav"
 maintainer:          "eitan@morphism.tech"
 copyright:           "2024 Eitan Chatav"
+category:            Control
+synopsis:            Atkey indexed monad transformers
 
 extra-source-files:
 - README.md
 - CHANGELOG.md
-
 
 description: Please see the README on GitHub at <https://github.com/morphismtech/indexed-transformers#readme>
 

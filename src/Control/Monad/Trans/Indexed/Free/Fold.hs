@@ -1,5 +1,14 @@
 {-# OPTIONS_GHC -fno-warn-name-shadowing #-}
 
+{- |
+Module      :  Control.Monad.Trans.Indexed.Free.Fold
+Copyright   :  (C) 2024 Eitan Chatav
+License     :  BSD 3-Clause License (see the file LICENSE)
+Maintainer  :  Eitan Chatav <eitan.chatav@gmail.com>
+
+An instance of the free indexed monad transformer encoded as `foldFreeIx`.
+-}
+
 module Control.Monad.Trans.Indexed.Free.Fold
   ( FreeIx (..)
   ) where
@@ -10,6 +19,11 @@ import Control.Monad.Trans
 import Control.Monad.Trans.Indexed
 import Control.Monad.Trans.Indexed.Free
 
+{- |
+`FreeIx` is the free indexed monad transformer encoded as its `foldFreeIx`.
+
+prop> foldFreeIx f freeIx = runFreeIx freeIx f
+-}
 newtype FreeIx g i j m x = FreeIx
   {runFreeIx :: forall t. (IxMonadTrans t, Monad m)
     => (forall i j x. g i j x -> t i j m x) -> t i j m x}
