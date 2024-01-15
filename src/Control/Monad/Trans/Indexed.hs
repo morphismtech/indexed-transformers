@@ -1,10 +1,3 @@
-{-# LANGUAGE
-    GADTs
-  , QuantifiedConstraints
-  , PolyKinds
-  , RankNTypes
-#-}
-
 module Control.Monad.Trans.Indexed
   ( IndexedMonadTrans (..)
   , Indexed (..)
@@ -14,6 +7,7 @@ import Control.Category (Category (..))
 import Control.Monad
 import Control.Monad.Trans
 import Data.Function ((&))
+import Data.Kind
 import Prelude hiding (id, (.))
 
 {- | An [Atkey indexed monad]
@@ -24,6 +18,9 @@ An indexed monad transformer transforms a `Monad` into an indexed monad,
 and is a monad transformer when its source and target are the same,
 enabling use of standard @do@ notation for endo-index operations.
 -}
+type IndexedMonadTrans
+  :: (k -> k -> (Type -> Type) -> Type -> Type)
+  -> Constraint
 class
   ( forall i j m. Monad m => Functor (t i j m)
   , forall i j m. (i ~ j, Monad m) => Monad (t i j m)
