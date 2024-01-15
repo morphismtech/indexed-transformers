@@ -8,5 +8,5 @@
   - writer indexed monad transformer
   - qualified indexed do notation
 
-* 0.1.0.1-3
-  - minor documentation fixes
+* 0.1.0.1-4
+  - minor fixes
