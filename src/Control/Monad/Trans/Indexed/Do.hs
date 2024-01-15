@@ -15,14 +15,14 @@ import Prelude hiding ((>>=), (>>), fail)
   => t i j m x
   -> (x -> t j k m y)
   -> t i k m y
-(>>=) = flip Ix.ixBind
+(>>=) = flip Ix.bindIx
 
 (>>)
   :: (Ix.IndexedMonadTrans t, M.Monad m)
   => t i j m x
   -> t j k m y
   -> t i k m y
-(>>) = flip Ix.ixThen
+(>>) = flip Ix.thenIx
 
 fail
   :: (Ix.IndexedMonadTrans t, M.MonadFail m, i ~ j)

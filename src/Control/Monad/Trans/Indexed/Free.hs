@@ -10,8 +10,8 @@
 {-# OPTIONS_GHC -fno-warn-name-shadowing #-}
 
 module Control.Monad.Trans.Indexed.Free
-  ( IxFree (ixlift, ixhoist, ixfoldMap), coerceIxFree
-  , IxFunctor, IxMap (IxMap), ixliftFreer, ixhoistFreer
+  ( IxFree (liftIxFree, hoistIxFree, runIxFree), coerceIxFree
+  , IxFunctor, IxMap (IxMap), liftIxFreer, hoistIxFreer
   ) where
 
 import Control.Monad.Free
@@ -46,14 +46,14 @@ data DVDCommand
 insert
   :: (IxFree free, Monad m)
   => DVD -> free (IxMap DVDCommand) 'False 'True m ()
-insert dvd = ixliftFreer (Insert dvd)
+insert dvd = liftIxFreer (Insert dvd)
 :}
 
 >>> :{
 eject
   :: (IxFree free, Monad m)
   => free (IxMap DVDCommand) 'True 'False m DVD
-eject = ixliftFreer Eject
+eject = liftIxFreer Eject
 :}
 
 >>> :set -XQualifiedDo
@@ -74,26 +74,26 @@ class
   , forall f m i j. (IxFunctor f, Monad m, i ~ j)
     => MonadFree (f i j) (free f i j m)
   ) => IxFree free where
-  ixlift
+  liftIxFree
     :: (IxFunctor f, Monad m)
     => f i j x
     -> free f i j m x
-  ixhoist
+  hoistIxFree
     :: (IxFunctor f, IxFunctor g, Monad m)
     => (forall i j x. f i j x -> g i j x)
     -> free f i j m x -> free g i j m x
-  ixfoldMap
+  runIxFree
     :: (IxFunctor f, IndexedMonadTrans t, Monad m)
     => (forall i j x. f i j x -> t i j m x)
     -> free f i j m x -> t i j m x
 
 {- |
-prop> coerceIxFree = ixfoldMap ixlift
+prop> coerceIxFree = runIxFree liftIxFree
 -}
 coerceIxFree
   :: (IxFree free0, IxFree free1, IxFunctor f, Monad m)
   => free0 f i j m x -> free1 f i j m x 
-coerceIxFree = ixfoldMap ixlift
+coerceIxFree = runIxFree liftIxFree
 
 type IxFunctor
   :: (k -> k -> Type -> Type)
@@ -112,13 +112,13 @@ data IxMap f i j x where
 instance Functor (IxMap f i j) where
   fmap g (IxMap f x) = IxMap (g . f) x
 
-ixliftFreer
+liftIxFreer
   :: (IxFree free, Monad m)
   => f i j x -> free (IxMap f) i j m x
-ixliftFreer x = ixlift (IxMap id x)
+liftIxFreer x = liftIxFree (IxMap id x)
 
-ixhoistFreer
+hoistIxFreer
   :: (IxFree free, Monad m)
   => (forall i j x. f i j x -> g i j x)
   -> free (IxMap f) i j m x -> free (IxMap g) i j m x
-ixhoistFreer f = ixhoist (\(IxMap g x) -> IxMap g (f x))
+hoistIxFreer f = hoistIxFree (\(IxMap g x) -> IxMap g (f x))

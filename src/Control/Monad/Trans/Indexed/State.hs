@@ -22,15 +22,15 @@ import Control.Monad.Trans.Indexed
 newtype StateIx i j m x = StateIx { runStateIx :: i -> m (x, j)}
   deriving Functor
 instance IndexedMonadTrans StateIx where
-  ixJoin (StateIx f) = StateIx $ \i -> do
+  joinIx (StateIx f) = StateIx $ \i -> do
     (StateIx g, j) <- f i
     g j
 instance (i ~ j, Monad m) => Applicative (StateIx i j m) where
   pure x = StateIx $ \i -> pure (x, i)
-  (<*>) = ixAp
+  (<*>) = apIx
 instance (i ~ j, Monad m) => Monad (StateIx i j m) where
   return = pure
-  (>>=) = flip ixBind
+  (>>=) = flip bindIx
 instance i ~ j => MonadTrans (StateIx i j) where
   lift m = StateIx $ \i -> (, i) <$> m
 instance (i ~ j, Monad m) => MonadState i (StateIx i j m) where

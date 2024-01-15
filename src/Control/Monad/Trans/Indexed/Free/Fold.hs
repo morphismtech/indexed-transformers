@@ -27,24 +27,24 @@ instance (IxFunctor f, Monad m) => Functor (FreeIx f i j m) where
 instance (IxFunctor f, i ~ j, Monad m)
   => Applicative (FreeIx f i j m) where
     pure x = FreeIx $ const $ pure x
-    (<*>) = ixAp
+    (<*>) = apIx
 instance (IxFunctor f, i ~ j, Monad m)
   => Monad (FreeIx f i j m) where
     return = pure
-    (>>=) = flip ixBind
+    (>>=) = flip bindIx
 instance (IxFunctor f, i ~ j)
   => MonadTrans (FreeIx f i j) where
     lift m = FreeIx $ const $ lift m
 instance IxFunctor f
   => IndexedMonadTrans (FreeIx f) where
-    ixJoin (FreeIx g) = FreeIx $ \k -> ixBind (\(FreeIx f) -> f k) (g k)
+    joinIx (FreeIx g) = FreeIx $ \k -> bindIx (\(FreeIx f) -> f k) (g k)
 instance
   ( IxFunctor f
   , Monad m
   , i ~ j
   ) => MonadFree (f i j) (FreeIx f i j m) where
-    wrap = join . ixlift
+    wrap = join . liftIxFree
 instance IxFree FreeIx where
-  ixlift m = FreeIx $ \k -> k m
-  ixhoist f (FreeIx k) = FreeIx $ \g -> k (g . f)
-  ixfoldMap f (FreeIx k) = k f
+  liftIxFree m = FreeIx $ \k -> k m
+  hoistIxFree f (FreeIx k) = FreeIx $ \g -> k (g . f)
+  runIxFree f (FreeIx k) = k f

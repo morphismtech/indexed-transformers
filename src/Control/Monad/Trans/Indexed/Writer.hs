@@ -27,7 +27,7 @@ newtype WriterIx w i j m x = WriterIx {runWriterIx :: m (x, w i j)}
   deriving Functor
 
 instance Category w => IndexedMonadTrans (WriterIx w) where
-  ixJoin (WriterIx mm) = WriterIx $ do
+  joinIx (WriterIx mm) = WriterIx $ do
     (WriterIx m, ij) <- mm
     (x, jk) <- m
     return (x, ij >>> jk)
@@ -40,7 +40,7 @@ instance (i ~ j, Applicative m, Category w) => Applicative (WriterIx w i j m) wh
       WriterIx $ apply <$> mf <*> mx
 instance (i ~ j, Monad m, Category w) => Monad (WriterIx w i j m) where
   return = pure
-  (>>=) = flip ixBind
+  (>>=) = flip bindIx
 instance (i ~ j, Category w) => MonadTrans (WriterIx w i j) where
   lift m = WriterIx $ do
     x <- m
