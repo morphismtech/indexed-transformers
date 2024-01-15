@@ -12,7 +12,7 @@ The free indexed monad transformer.
 
 module Control.Monad.Trans.Indexed.Free
   ( IxMonadTransFree (liftFreeIx, hoistFreeIx, foldFreeIx), coerceFreeIx
-  , IxFunctor, IxMap (IxMap), liftFreerIx, hoistFreerIx
+  , IxFunctor, IxMap (IxMap), liftFreerIx, hoistFreerIx, foldFreerIx
   ) where
 
 import Control.Monad.Free
@@ -132,3 +132,9 @@ hoistFreerIx
   => (forall i j x. f i j x -> g i j x)
   -> freeIx (IxMap f) i j m x -> freeIx (IxMap g) i j m x
 hoistFreerIx f = hoistFreeIx (\(IxMap g x) -> IxMap g (f x))
+
+foldFreerIx
+  :: (IxMonadTransFree freeIx, IxMonadTrans t, Monad m)
+  => (forall i j x. f i j x -> t i j m x)
+  -> freeIx (IxMap f) i j m x -> t i j m x
+foldFreerIx f x = foldFreeIx (\(IxMap g y) -> g <$> f y) x
