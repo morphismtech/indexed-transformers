@@ -22,6 +22,7 @@ module Control.Monad.Trans.Indexed.Writer
 import Prelude hiding (id, (.))
 import Control.Applicative
 import Control.Category
+import Control.Monad
 import Control.Monad.Catch
 import Control.Monad.Morph
 import Control.Monad.Trans.Indexed
@@ -49,6 +50,10 @@ instance (i ~ j, Alternative m, Category w)
 instance (i ~ j, Monad m, Category w) => Monad (WriterIx w i j m) where
   return = pure
   (>>=) = flip bindIx
+instance (i ~ j, MonadPlus m, Category w)
+  => MonadPlus (WriterIx w i j m) where
+  mzero = WriterIx mzero
+  mplus (WriterIx mx) (WriterIx my) = WriterIx (mplus mx my)
 instance (i ~ j, Category w) => MonadTrans (WriterIx w i j) where
   lift m = WriterIx $ do
     x <- m
