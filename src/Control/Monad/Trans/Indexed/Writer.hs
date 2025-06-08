@@ -21,7 +21,8 @@ module Control.Monad.Trans.Indexed.Writer
 
 import Prelude hiding (id, (.))
 import Control.Category
-import Control.Monad.Trans
+import Control.Monad.Catch
+import Control.Monad.Morph
 import Control.Monad.Trans.Indexed
 
 newtype WriterIx w i j m x = WriterIx {runWriterIx :: m (x, w i j)}
@@ -46,6 +47,44 @@ instance (i ~ j, Category w) => MonadTrans (WriterIx w i j) where
   lift m = WriterIx $ do
     x <- m
     return (x, id)
+instance MFunctor (WriterIx w i j) where
+  hoist f (WriterIx m) = WriterIx $ f m
+instance (i ~ j, Category w) => MMonad (WriterIx w i j) where
+  embed f (WriterIx m) = WriterIx $ do
+    ((b,w0),w1) <- runWriterIx $ f m
+    return (b, w0 >>> w1)
+instance (i ~ j, Category w, MonadThrow m)
+  => MonadThrow (WriterIx w i j m) where
+    throwM = lift . throwM
+instance (i ~ j, Category w, MonadCatch m)
+  => MonadCatch (WriterIx w i j m) where
+    catch (WriterIx m) h = WriterIx $ catch m (runWriterIx . h)
+instance (i ~ j, Category w, MonadMask m)
+  => MonadMask (WriterIx w i j m) where
+  mask a = WriterIx $ mask $ \u -> runWriterIx (a $ q u)
+    where q u b = WriterIx $ u (runWriterIx b)
+  uninterruptibleMask a =
+    WriterIx $ uninterruptibleMask $ \u -> runWriterIx (a $ q u)
+      where q u b = WriterIx $ u (runWriterIx b)
+  generalBracket acquire release use = WriterIx $ do
+    ((b, _w12), (c, w123)) <- generalBracket
+      (runWriterIx acquire)
+      (\(resource, w1) exitCase -> case exitCase of
+        ExitCaseSuccess (b, w12) -> do
+          (c, w3) <- runWriterIx (release resource (ExitCaseSuccess b))
+          return (c, w12 >>> w3)
+        -- In the two other cases, the base monad overrides @use@'s state
+        -- changes and the state reverts to @w1@.
+        ExitCaseException e -> do
+          (c, w3) <- runWriterIx (release resource (ExitCaseException e))
+          return (c, w1 >>> w3)
+        ExitCaseAbort -> do
+          (c, w3) <- runWriterIx (release resource ExitCaseAbort)
+          return (c, w1 >>> w3))
+      (\(resource, w1) -> do
+        (a, w2) <- runWriterIx (use resource)
+        return (a, w1 >>> w2))
+    return ((b, c), w123)
 
 evalWriterIx :: Monad m => WriterIx w i j m x -> m x
 evalWriterIx (WriterIx m) = fst <$> m
