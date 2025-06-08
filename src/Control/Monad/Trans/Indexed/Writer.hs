@@ -20,6 +20,7 @@ module Control.Monad.Trans.Indexed.Writer
   ) where
 
 import Prelude hiding (id, (.))
+import Control.Applicative
 import Control.Category
 import Control.Monad.Catch
 import Control.Monad.Morph
@@ -33,13 +34,18 @@ instance Category w => IxMonadTrans (WriterIx w) where
     (WriterIx m, ij) <- mm
     (x, jk) <- m
     return (x, ij >>> jk)
-instance (i ~ j, Applicative m, Category w) => Applicative (WriterIx w i j m) where
-  pure x = WriterIx (pure (x, id))
-  WriterIx mf <*> WriterIx mx =
-    let
-      apply (f, ij) (x, jk) = (f x, ij >>> jk)
-    in
-      WriterIx $ apply <$> mf <*> mx
+instance (i ~ j, Applicative m, Category w)
+  => Applicative (WriterIx w i j m) where
+    pure x = WriterIx (pure (x, id))
+    WriterIx mf <*> WriterIx mx =
+      let
+        apply (f, ij) (x, jk) = (f x, ij >>> jk)
+      in
+        WriterIx $ apply <$> mf <*> mx
+instance (i ~ j, Alternative m, Category w)
+  => Alternative (WriterIx w i j m) where
+    empty = WriterIx empty
+    WriterIx mx <|> WriterIx my = WriterIx (mx <|> my)
 instance (i ~ j, Monad m, Category w) => Monad (WriterIx w i j m) where
   return = pure
   (>>=) = flip bindIx
