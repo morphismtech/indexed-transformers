@@ -17,6 +17,7 @@ module Control.Monad.Trans.Indexed.State
   , fromStateT
   ) where
 
+import Control.Monad.Catch
 import Control.Monad.State
 import Control.Monad.Trans.Indexed
 
@@ -36,6 +37,31 @@ instance i ~ j => MonadTrans (StateIx i j) where
   lift m = StateIx $ \i -> (, i) <$> m
 instance (i ~ j, Monad m) => MonadState i (StateIx i j m) where
   state f = StateIx (return . f)
+instance (i ~ j, MonadThrow m)
+  => MonadThrow (StateIx i j m) where
+    throwM = lift . throwM
+instance (i ~ j, MonadCatch m)
+  => MonadCatch (StateIx i j m) where
+    catch (StateIx m) h = StateIx $ \i ->
+      catch (m i) (\e -> runStateIx (h e) i)
+instance (i ~ j, MonadMask m)
+  => MonadMask (StateIx i j m) where
+  mask a = StateIx $ \s -> mask $ \u -> runStateIx (a $ q u) s
+    where q u (StateIx b) = StateIx (u . b)
+  uninterruptibleMask a =
+    StateIx $ \s -> uninterruptibleMask $ \u -> runStateIx (a $ q u) s
+      where q u (StateIx b) = StateIx (u . b)
+  generalBracket acquire release use = StateIx $ \s0 -> do
+    ((b, _s2), (c, s3)) <- generalBracket
+      (runStateIx acquire s0)
+      (\(resource, s1) exitCase -> case exitCase of
+        ExitCaseSuccess (b, s2) -> runStateIx (release resource (ExitCaseSuccess b)) s2
+        -- In the two other cases, the base monad overrides @use@'s state
+        -- changes and the state reverts to @s1@.
+        ExitCaseException e     -> runStateIx (release resource (ExitCaseException e)) s1
+        ExitCaseAbort           -> runStateIx (release resource ExitCaseAbort) s1)
+      (\(resource, s1) -> runStateIx (use resource) s1)
+    return ((b, c), s3)
 
 evalStateIx :: Monad m => StateIx i j m x -> i -> m x
 evalStateIx m i = fst <$> runStateIx m i

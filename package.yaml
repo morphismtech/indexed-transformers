@@ -16,7 +16,9 @@ description: Please see the README on GitHub at <https://github.com/morphismtech
 
 dependencies:
 - base >= 4.7 && < 5
+- exceptions
 - free
+- mmorph
 - mtl
 - transformers
 
