@@ -10,7 +10,7 @@ module Control.Monad.Trans.Indexed.Codensity
   , lowerCodensityIx
   , liftCodensityIx
   , ReaderIx
-  , StateIx
+  , KanStateIx
   , ReadStx (..)
   ) where
 
@@ -57,21 +57,21 @@ instance (i ~ j, Alternative (t i j m), IxMonadTrans t, Monad m)
 instance (i ~ j, Alternative (t i j m), IxMonadTrans t, Monad m)
   => MonadPlus (CodensityIx t i j m)
 instance (i ~ j, IxMonadTransReader t, Monad m)
-  => MonadReader i (CodensityIx t i j m) where
-  ask = liftCodensityIx ask
-  local = localIx
-instance IxMonadTransReader t => IxMonadTransReader (CodensityIx t) where
-  localIx f m = bindIx (thenIx m . putIx . f) ask
-instance (i ~ j, IxMonadTransReader t, Monad m)
   => MonadState i (CodensityIx t i j m) where
-  get = ask
+  get = liftCodensityIx ask
   put = putIx
 instance IxMonadTransReader t => IxMonadTransState (CodensityIx t) where
-  putIx s = CodensityIx (\k -> localIx (const s) (k ()))
+  putIx s = CodensityIx (localIx (const s) . ($ ()))
+
+class
+  ( IxMonadTrans t
+  , forall m i j r. (Monad m, i ~ j, j ~ r) => MonadReader r (t i j m)
+  ) => IxMonadTransReader t where
+  localIx :: Monad m => (i -> h) -> t h j m a -> t i j m a
 
 type ReaderIx = FreeIx (Ixer ReadStx)
 
-type StateIx = CodensityIx ReaderIx
+type KanStateIx = CodensityIx ReaderIx
 
 data ReadStx s t x where AskStx :: ReadStx s s s
 
@@ -81,4 +81,4 @@ instance (s ~ t, Monad m, IxMonadTransFree freeIx)
     local = localIx
 instance IxMonadTransFree freeIx
   => IxMonadTransReader (freeIx (Ixer ReadStx)) where
-    localIx f = lowerCodensityIx . localIx f . liftCodensityIx
+    localIx f = lowerCodensityIx . (\m -> bindIx (thenIx m . putIx . f) get) . liftCodensityIx
