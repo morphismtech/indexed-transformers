@@ -28,7 +28,6 @@ source-repository head
 library
   exposed-modules:
       Control.Monad.Trans.Indexed
-      Control.Monad.Trans.Indexed.Codensity
       Control.Monad.Trans.Indexed.Cont
       Control.Monad.Trans.Indexed.Do
       Control.Monad.Trans.Indexed.Free
