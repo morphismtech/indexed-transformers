@@ -47,9 +47,6 @@ instance i ~ j => MonadTrans (StateIx i j) where
   lift m = StateIx $ \i -> (, i) <$> m
 instance (i ~ j, Monad m) => MonadState i (StateIx i j m) where
   state f = StateIx (return . f)
-instance (i ~ j, Monad m) => MonadReader i (StateIx i j m) where
-  ask = get
-  local = undefined
 
 evalStateIx :: Monad m => StateIx i j m x -> i -> m x
 evalStateIx m i = fst <$> runStateIx m i
