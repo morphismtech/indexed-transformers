@@ -12,6 +12,7 @@ module Control.Monad.Trans.Indexed.Free.Wrap
   , WrapIx (..)
   ) where
 
+import Control.Applicative
 import Control.Monad.Free
 import Control.Monad.Trans
 import Control.Monad.Trans.Indexed
@@ -34,6 +35,10 @@ instance (IxFunctor f, i ~ j, Monad m)
   => Applicative (FreeIx f i j m) where
     pure = FreeIx . pure . Unwrap
     (<*>) = apIx
+instance (IxFunctor f, i ~ j, Monad m, Alternative m)
+  => Alternative (FreeIx f i j m) where
+    empty = FreeIx empty
+    FreeIx x <|> FreeIx y = FreeIx (x <|> y)
 instance (IxFunctor f, i ~ j, Monad m)
   => Monad (FreeIx f i j m) where
     return = pure
