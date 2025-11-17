@@ -11,8 +11,6 @@ module Control.Monad.Trans.Indexed.State
   ( StateIx (..)
   , evalStateIx
   , execStateIx
-  , modifyIx
-  , putIx
   , toStateT
   , fromStateT
   , IxMonadTransReader (..)
@@ -23,7 +21,7 @@ import Control.Monad.Reader
 import Control.Monad.State
 import Control.Monad.Trans.Indexed
 
-newtype StateIx i j m x = StateIx { runStateIx :: i -> m (x, j)}
+newtype StateIx i j m x = StateIx {runStateIx :: i -> m (x, j)}
   deriving Functor
 instance IxMonadTrans StateIx where
   joinIx (StateIx f) = StateIx $ \i -> do
@@ -39,18 +37,15 @@ instance i ~ j => MonadTrans (StateIx i j) where
   lift m = StateIx $ \i -> (, i) <$> m
 instance (i ~ j, Monad m) => MonadState i (StateIx i j m) where
   state f = StateIx (return . f)
+instance (i ~ j, Monad m) => MonadReader i (StateIx i j m) where
+  ask = get
+  local = undefined
 
 evalStateIx :: Monad m => StateIx i j m x -> i -> m x
 evalStateIx m i = fst <$> runStateIx m i
 
 execStateIx :: Monad m => StateIx i j m x -> i -> m j
 execStateIx m i = snd <$> runStateIx m i
-
-modifyIx :: Applicative m => (i -> j) -> StateIx i j m ()
-modifyIx f = StateIx $ \i -> pure ((), f i)
-
--- putIx :: Applicative m => j -> StateIx i j m ()
--- putIx j = modifyIx (\ _ -> j)
 
 toStateT :: StateIx i i m x -> StateT i m x
 toStateT (StateIx f) = StateT f
@@ -60,14 +55,14 @@ fromStateT (StateT f) = StateIx f
 
 class
   ( IxMonadTrans t
-  , forall m i j r. (Monad m, i ~ j, j ~ r) => MonadReader r (t i j m)
-  ) => IxMonadTransReader t where
-  localIx :: Monad m => (i -> h) -> t h j m a -> t i j m a
-
-class
-  ( IxMonadTrans t
   , forall m i j s. (Monad m, i ~ j, j ~ s) => MonadState s (t i j m)
   ) => IxMonadTransState t where
   putIx :: Monad m => j -> t i j m ()
+  putIx s = stateIx (\_ -> ((), s))
+  modifyIx :: Monad m => (i -> j) -> t i j m ()
+  modifyIx f = stateIx (\i -> ((), f i))
+  stateIx :: Monad m => (i -> (a,j)) -> t i j m a
+  stateIx f =
+    bindIx (\s -> let ~(a, s') = f s in thenIx (return a) (putIx s')) get
 instance IxMonadTransState StateIx where
-  putIx j = modifyIx (\ _ -> j)
+  stateIx f = StateIx (return . f)
