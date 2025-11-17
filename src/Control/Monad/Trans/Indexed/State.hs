@@ -15,8 +15,11 @@ module Control.Monad.Trans.Indexed.State
   , putIx
   , toStateT
   , fromStateT
+  , IxMonadTransReader (..)
+  , IxMonadTransState (..)
   ) where
 
+import Control.Monad.Reader
 import Control.Monad.State
 import Control.Monad.Trans.Indexed
 
@@ -46,11 +49,25 @@ execStateIx m i = snd <$> runStateIx m i
 modifyIx :: Applicative m => (i -> j) -> StateIx i j m ()
 modifyIx f = StateIx $ \i -> pure ((), f i)
 
-putIx :: Applicative m => j -> StateIx i j m ()
-putIx j = modifyIx (\ _ -> j)
+-- putIx :: Applicative m => j -> StateIx i j m ()
+-- putIx j = modifyIx (\ _ -> j)
 
 toStateT :: StateIx i i m x -> StateT i m x
 toStateT (StateIx f) = StateT f
 
 fromStateT :: StateT i m x -> StateIx i i m x
 fromStateT (StateT f) = StateIx f
+
+class
+  ( IxMonadTrans t
+  , forall m i j r. (Monad m, i ~ j, j ~ r) => MonadReader r (t i j m)
+  ) => IxMonadTransReader t where
+  localIx :: Monad m => (i -> h) -> t h j m a -> t i j m a
+
+class
+  ( IxMonadTrans t
+  , forall m i j s. (Monad m, i ~ j, j ~ s) => MonadState s (t i j m)
+  ) => IxMonadTransState t where
+  putIx :: Monad m => j -> t i j m ()
+instance IxMonadTransState StateIx where
+  putIx j = modifyIx (\ _ -> j)
