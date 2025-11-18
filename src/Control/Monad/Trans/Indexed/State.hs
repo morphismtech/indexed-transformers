@@ -112,6 +112,16 @@ fromStateIx (StateIx f) = Ix.do
 toStateIx :: Monad m => CodensityIx ReaderIx i j m x -> StateIx i j m x
 toStateIx = StateIx . runReaderIx . lowerCodensityIx
 
+class
+  ( IxMonadTrans t
+  , forall m r i j. (Monad m, r ~ i, i ~ j) => MonadReader r (t i j m)
+  ) => IxMonadTransReader t where
+  localIx :: Monad m => (i -> r) -> t r j m a -> t i j m a
+
+type ReaderIx = FreeIx (Ixer ReadStx)
+
+data ReadStx s t x where AskStx :: ReadStx s s s
+
 runReaderIx :: Monad m => ReaderIx i j m x -> i -> m (x, j)
 runReaderIx (FreeIx m) i = do
   wrapped <- m
@@ -132,16 +142,6 @@ fromReaderT :: Monad m => ReaderT i m x -> ReaderIx i i m x
 fromReaderT (ReaderT f) = do
   i <- ask
   lift (f i)
-
-class
-  ( IxMonadTrans t
-  , forall m r i j. (Monad m, r ~ i, i ~ j) => MonadReader r (t i j m)
-  ) => IxMonadTransReader t where
-  localIx :: Monad m => (i -> r) -> t r j m a -> t i j m a
-
-type ReaderIx = FreeIx (Ixer ReadStx)
-
-data ReadStx s t x where AskStx :: ReadStx s s s
 
 instance IxMonadTrans t => IxMonadTrans (CodensityIx t) where
   joinIx (CodensityIx k) =
