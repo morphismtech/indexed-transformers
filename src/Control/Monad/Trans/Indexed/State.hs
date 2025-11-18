@@ -161,7 +161,6 @@ instance (i ~ j, IxMonadTransReader t, Monad m)
   put = putIx
 instance IxMonadTransReader t => IxMonadTransState (CodensityIx t) where
   putIx s = CodensityIx (localIx (const s) . ($ ()))
-
 instance (s ~ t, Monad m, IxMonadTransFree freeIx)
   => MonadReader s (freeIx (Ixer ReadStx) s t m) where
     ask = liftFreerIx AskStx
