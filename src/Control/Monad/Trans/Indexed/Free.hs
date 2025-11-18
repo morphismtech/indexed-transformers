@@ -112,7 +112,7 @@ type IxFunctor
 type IxFunctor f = forall i j. Functor (f i j)
 
 {- |
-`Ixer` is the free `IxFunctor`. It's a left Kan extension.
+`Ixer` is the free `IxFunctor`.
 Combining `IxMonadTransFree` with `Ixer` as demonstrated in the above example,
 gives the "freer" `IxMonadTrans`, modeled on this
 [Oleg Kiselyov explanation]
