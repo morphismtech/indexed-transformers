@@ -49,6 +49,7 @@ library
       LambdaCase
       MultiParamTypeClasses
       PolyKinds
+      QualifiedDo
       QuantifiedConstraints
       RankNTypes
       StandaloneKindSignatures

@@ -37,6 +37,7 @@ import Control.Monad
 import Control.Monad.Reader
 import Control.Monad.State
 import Control.Monad.Trans.Indexed
+import qualified Control.Monad.Trans.Indexed.Do as Ix
 import Control.Monad.Trans.Indexed.Free
 import Control.Monad.Trans.Indexed.Free.Wrap
 
@@ -79,8 +80,11 @@ class
   modifyIx :: Monad m => (i -> j) -> t i j m ()
   modifyIx f = stateIx (\i -> ((), f i))
   stateIx :: Monad m => (i -> (a,j)) -> t i j m a
-  stateIx f =
-    bindIx (\s -> let ~(a, s') = f s in thenIx (return a) (putIx s')) get
+  stateIx f = Ix.do
+    s <- get
+    let ~(a, s') = f s
+    putIx s'
+    return a
 instance IxMonadTransState StateIx where
   stateIx f = StateIx (return . f)
 
@@ -99,8 +103,11 @@ liftCodensityIx
 liftCodensityIx m = CodensityIx $ \h -> bindIx h m
 
 fromStateIx :: Monad m => StateIx i j m x -> CodensityIx ReaderIx i j m x
-fromStateIx (StateIx f) = get & bindIx
-  (bindIx (\(x,j) -> putIx j & thenIx (return x)) . lift . f)
+fromStateIx (StateIx f) = Ix.do
+  i <- get
+  (x,j) <- lift (f i)
+  putIx j
+  return x
 
 toStateIx :: Monad m => CodensityIx ReaderIx i j m x -> StateIx i j m x
 toStateIx = StateIx . runReaderIx . lowerCodensityIx
@@ -169,5 +176,5 @@ instance IxMonadTransFree freeIx
   => IxMonadTransReader (freeIx (Ixer ReadStx)) where
     localIx f
       = lowerCodensityIx
-      . (\m -> bindIx (thenIx m . putIx . f) get)
+      . (\m -> Ix.do {i <- get; putIx (f i); m})
       . liftCodensityIx
