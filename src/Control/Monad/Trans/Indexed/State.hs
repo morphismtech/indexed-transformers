@@ -17,11 +17,13 @@ module Control.Monad.Trans.Indexed.State
   , fromStateT
     -- * Reader
   , IxMonadTransReader (..)
+  , ReaderIx
   , ReadStx (..)
     -- * Codensity
   , CodensityIx (..)
   , liftCodensityIx
   , lowerCodensityIx
+  , fromStateIx
   ) where
 
 import Control.Applicative
@@ -30,6 +32,7 @@ import Control.Monad.Reader
 import Control.Monad.State
 import Control.Monad.Trans.Indexed
 import Control.Monad.Trans.Indexed.Free
+import Control.Monad.Trans.Indexed.Free.Wrap
 
 newtype StateIx i j m x = StateIx {runStateIx :: i -> m (x, j)}
   deriving Functor
@@ -88,11 +91,17 @@ liftCodensityIx
   => t i j m a -> CodensityIx t i j m a
 liftCodensityIx m = CodensityIx $ \h -> bindIx h m
 
+fromStateIx :: Monad m => StateIx i j m x -> CodensityIx ReaderIx i j m x
+fromStateIx (StateIx f) = get & bindIx
+  (bindIx (\(x,j) -> putIx j & thenIx (return x)) . lift . f)
+
 class
   ( IxMonadTrans t
   , forall m i j r. (Monad m, i ~ j, j ~ r) => MonadReader r (t i j m)
   ) => IxMonadTransReader t where
   localIx :: Monad m => (i -> h) -> t h j m a -> t i j m a
+
+type ReaderIx = FreeIx (Ixer ReadStx)
 
 data ReadStx s t x where AskStx :: ReadStx s s s
 
@@ -128,4 +137,7 @@ instance (s ~ t, Monad m, IxMonadTransFree freeIx)
     local = localIx
 instance IxMonadTransFree freeIx
   => IxMonadTransReader (freeIx (Ixer ReadStx)) where
-    localIx f = lowerCodensityIx . (\m -> bindIx (thenIx m . putIx . f) get) . liftCodensityIx
+    localIx f
+      = lowerCodensityIx
+      . (\m -> bindIx (thenIx m . putIx . f) get)
+      . liftCodensityIx
