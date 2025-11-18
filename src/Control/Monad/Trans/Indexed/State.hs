@@ -18,12 +18,16 @@ module Control.Monad.Trans.Indexed.State
     -- * Reader
   , IxMonadTransReader (..)
   , ReaderIx
+  , runReaderIx
+  , evalReaderIx
+  , execReaderIx
   , ReadStx (..)
     -- * Codensity
   , CodensityIx (..)
   , liftCodensityIx
   , lowerCodensityIx
   , fromStateIx
+  , toStateIx
   ) where
 
 import Control.Applicative
@@ -65,7 +69,7 @@ fromStateT (StateT f) = StateIx f
 
 class
   ( IxMonadTrans t
-  , forall m i j s. (Monad m, i ~ j, j ~ s) => MonadState s (t i j m)
+  , forall m s i j. (Monad m, s ~ i, i ~ j) => MonadState s (t i j m)
   ) => IxMonadTransState t where
   {-# MINIMAL putIx | stateIx #-}
   putIx :: Monad m => j -> t i j m ()
@@ -96,11 +100,27 @@ fromStateIx :: Monad m => StateIx i j m x -> CodensityIx ReaderIx i j m x
 fromStateIx (StateIx f) = get & bindIx
   (bindIx (\(x,j) -> putIx j & thenIx (return x)) . lift . f)
 
+toStateIx :: Monad m => CodensityIx ReaderIx i j m x -> StateIx i j m x
+toStateIx = StateIx . runReaderIx . lowerCodensityIx
+
+runReaderIx :: Monad m => ReaderIx i j m x -> i -> m (x, j)
+runReaderIx (FreeIx m) i = do
+  wrapped <- m
+  case wrapped of
+    Unwrap x -> return (x,i)
+    Wrap (Ixer f AskStx) -> runReaderIx (f i) i
+
+evalReaderIx :: Monad m => ReaderIx i j m x -> i -> m x
+evalReaderIx m i = fst <$> runReaderIx m i
+
+execReaderIx :: Monad m => ReaderIx i j m x -> i -> m j
+execReaderIx m i = snd <$> runReaderIx m i
+
 class
   ( IxMonadTrans t
-  , forall m i j r. (Monad m, i ~ j, j ~ r) => MonadReader r (t i j m)
+  , forall m r i j. (Monad m, r ~ i, i ~ j) => MonadReader r (t i j m)
   ) => IxMonadTransReader t where
-  localIx :: Monad m => (i -> h) -> t h j m a -> t i j m a
+  localIx :: Monad m => (i -> r) -> t r j m a -> t i j m a
 
 type ReaderIx = FreeIx (Ixer ReadStx)
 
