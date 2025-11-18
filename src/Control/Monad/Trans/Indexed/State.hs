@@ -23,7 +23,7 @@ module Control.Monad.Trans.Indexed.State
   , execReaderIx
   , toReaderT
   , fromReaderT
-  , ReadStx (..)
+  , AskIx (..)
     -- * Codensity
   , CodensityIx (..)
   , liftCodensityIx
@@ -118,16 +118,16 @@ class
   ) => IxMonadTransReader t where
   localIx :: Monad m => (i -> r) -> t r j m a -> t i j m a
 
-type ReaderIx = FreeIx (Ixer ReadStx)
+type ReaderIx = FreeIx (Ixer AskIx)
 
-data ReadStx s t x where AskStx :: ReadStx s s s
+data AskIx i j x where AskIx :: AskIx x x x
 
 runReaderIx :: Monad m => ReaderIx i j m x -> i -> m (x, j)
 runReaderIx (FreeIx m) i = do
   wrapped <- m
   case wrapped of
     Unwrap x -> return (x,i)
-    Wrap (Ixer f AskStx) -> runReaderIx (f i) i
+    Wrap (Ixer f AskIx) -> runReaderIx (f i) i
 
 evalReaderIx :: Monad m => ReaderIx i j m x -> i -> m x
 evalReaderIx m i = fst <$> runReaderIx m i
@@ -169,11 +169,11 @@ instance (i ~ j, IxMonadTransReader t, Monad m)
 instance IxMonadTransReader t => IxMonadTransState (CodensityIx t) where
   putIx s = CodensityIx (localIx (const s) . ($ ()))
 instance (s ~ t, Monad m, IxMonadTransFree freeIx)
-  => MonadReader s (freeIx (Ixer ReadStx) s t m) where
-    ask = liftFreerIx AskStx
+  => MonadReader s (freeIx (Ixer AskIx) s t m) where
+    ask = liftFreerIx AskIx
     local = localIx
 instance IxMonadTransFree freeIx
-  => IxMonadTransReader (freeIx (Ixer ReadStx)) where
+  => IxMonadTransReader (freeIx (Ixer AskIx)) where
     localIx f
       = lowerCodensityIx
       . (\m -> Ix.do {i <- get; putIx (f i); m})
