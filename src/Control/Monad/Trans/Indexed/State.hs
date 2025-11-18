@@ -21,6 +21,8 @@ module Control.Monad.Trans.Indexed.State
   , runReaderIx
   , evalReaderIx
   , execReaderIx
+  , toReaderT
+  , fromReaderT
   , ReadStx (..)
     -- * Codensity
   , CodensityIx (..)
@@ -115,6 +117,14 @@ evalReaderIx m i = fst <$> runReaderIx m i
 
 execReaderIx :: Monad m => ReaderIx i j m x -> i -> m j
 execReaderIx m i = snd <$> runReaderIx m i
+
+toReaderT :: Monad m => ReaderIx i i m x -> ReaderT i m x
+toReaderT = ReaderT . evalReaderIx
+
+fromReaderT :: Monad m => ReaderT i m x -> ReaderIx i i m x
+fromReaderT (ReaderT f) = do
+  i <- ask
+  lift (f i)
 
 class
   ( IxMonadTrans t
