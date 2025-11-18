@@ -1,3 +1,5 @@
+{-# LANGUAGE UndecidableInstances #-}
+
 {- |
 Module      :  Control.Monad.Trans.Indexed.Free.Wrap
 Copyright   :  (C) 2024 Eitan Chatav
@@ -13,10 +15,12 @@ module Control.Monad.Trans.Indexed.Free.Wrap
   ) where
 
 import Control.Applicative
+import Control.Monad.Except
 import Control.Monad.Free
 import Control.Monad.Trans
 import Control.Monad.Trans.Indexed
 import Control.Monad.Trans.Indexed.Free
+import Witherable
 
 data WrapIx f i j m x where
   Unwrap :: x -> WrapIx f i i m x
@@ -26,11 +30,21 @@ instance (IxFunctor f, Monad m)
     fmap f = \case
       Unwrap x -> Unwrap $ f x
       Wrap fm -> Wrap $ fmap (fmap f) fm
+instance (IxFilterable f, Monad m)
+  => Filterable (WrapIx f i j m) where
+    mapMaybe f = \case
+      Unwrap a -> case f a of
+        Nothing -> Wrap (_)
+        Just b -> Unwrap b
+      Wrap m -> Wrap (fmap (mapMaybe f) m)
 
 newtype FreeIx f i j m x = FreeIx {runFreeIx :: m (WrapIx f i j m x)}
 instance (IxFunctor f, Monad m)
   => Functor (FreeIx f i j m) where
     fmap f (FreeIx m) = FreeIx $ fmap (fmap f) m
+instance (IxFilterable f, Monad m)
+  => Filterable (FreeIx f i j m) where
+    mapMaybe f (FreeIx m) = FreeIx $ fmap (mapMaybe f) m
 instance (IxFunctor f, i ~ j, Monad m)
   => Applicative (FreeIx f i j m) where
     pure = FreeIx . pure . Unwrap
@@ -69,3 +83,6 @@ instance IxMonadTransFree FreeIx where
       foldMap_f = \case
         Unwrap x -> return x
         Wrap y -> bindIx (foldFreeIx f) (f y)
+instance (IxFunctor f, MonadError e m) => MonadError e (FreeIx f i i m) where
+  throwError = FreeIx . throwError
+  FreeIx m `catchError` f = FreeIx $ m `catchError` (runFreeIx . f)

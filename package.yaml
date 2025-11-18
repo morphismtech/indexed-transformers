@@ -19,6 +19,7 @@ dependencies:
 - free
 - mtl
 - transformers
+- witherable
 
 ghc-options:
 - -Wall
