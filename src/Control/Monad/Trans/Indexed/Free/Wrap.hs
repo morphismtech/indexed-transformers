@@ -28,6 +28,11 @@ instance (IxFunctor f, Monad m)
       Wrap fm -> Wrap $ fmap (fmap f) fm
 
 newtype FreeIx f i j m x = FreeIx {runFreeIx :: m (WrapIx f i j m x)}
+instance IxFunctor f
+  => IxMonadTrans (FreeIx f) where
+    joinIx (FreeIx mm) = FreeIx $ mm >>= \case
+      Unwrap (FreeIx m) -> m
+      Wrap fm -> return $ Wrap $ fmap joinIx fm
 instance (IxFunctor f, Monad m)
   => Functor (FreeIx f i j m) where
     fmap f (FreeIx m) = FreeIx $ fmap (fmap f) m
@@ -46,11 +51,6 @@ instance (IxFunctor f, i ~ j, Monad m)
 instance (IxFunctor f, i ~ j)
   => MonadTrans (FreeIx f i j) where
     lift = FreeIx . fmap Unwrap
-instance IxFunctor f
-  => IxMonadTrans (FreeIx f) where
-    joinIx (FreeIx mm) = FreeIx $ mm >>= \case
-      Unwrap (FreeIx m) -> m
-      Wrap fm -> return $ Wrap $ fmap joinIx fm
 instance
   ( IxFunctor f
   , Monad m
