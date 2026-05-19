@@ -1,6 +1,6 @@
 cabal-version: 2.2
 
--- This file has been generated from package.yaml by hpack version 0.36.0.
+-- This file has been generated from package.yaml by hpack version 0.38.1.
 --
 -- see: https://github.com/sol/hpack
 
@@ -33,6 +33,7 @@ library
       Control.Monad.Trans.Indexed.Free
       Control.Monad.Trans.Indexed.Free.Fold
       Control.Monad.Trans.Indexed.Free.Wrap
+      Control.Monad.Trans.Indexed.Kan
       Control.Monad.Trans.Indexed.State
       Control.Monad.Trans.Indexed.Writer
   other-modules:
@@ -49,6 +50,7 @@ library
       LambdaCase
       MultiParamTypeClasses
       PolyKinds
+      QualifiedDo
       QuantifiedConstraints
       RankNTypes
       StandaloneKindSignatures

@@ -39,6 +39,7 @@ default-extensions:
 - LambdaCase
 - MultiParamTypeClasses
 - PolyKinds
+- QualifiedDo
 - QuantifiedConstraints
 - RankNTypes
 - StandaloneKindSignatures
