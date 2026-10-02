@@ -1,11 +1,10 @@
-{-# LANGUAGE UndecidableInstances #-}
-
 {- |
 Module      :  Control.Monad.Trans.Indexed.Codensity
 Copyright   :  (C) 2026 Eitan Chatav
 License     :  BSD 3-Clause License (see the file LICENSE)
 Maintainer  :  Eitan Chatav <eitan.chatav@gmail.com>
 
+The indexed codensity monad transformer.
 -}
 
 module Control.Monad.Trans.Indexed.Codensity
