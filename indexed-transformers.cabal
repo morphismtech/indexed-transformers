@@ -13,7 +13,7 @@ homepage:       https://github.com/morphismtech/indexed-transformers#readme
 bug-reports:    https://github.com/morphismtech/indexed-transformers/issues
 author:         Eitan Chatav
 maintainer:     eitan@morphism.tech
-copyright:      2024 Eitan Chatav
+copyright:      2026 Eitan Chatav
 license:        BSD-3-Clause
 license-file:   LICENSE
 build-type:     Simple

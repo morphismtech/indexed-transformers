@@ -2,7 +2,7 @@
 
 {- |
 Module      :  Control.Monad.Trans.Indexed.Free.Fold
-Copyright   :  (C) 2024 Eitan Chatav
+Copyright   :  (C) 2026 Eitan Chatav
 License     :  BSD 3-Clause License (see the file LICENSE)
 Maintainer  :  Eitan Chatav <eitan.chatav@gmail.com>
 
