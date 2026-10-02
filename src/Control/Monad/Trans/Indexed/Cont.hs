@@ -1,5 +1,5 @@
 {- |
-Module      :  Control.Monad.Trans.Indexed.Codensity
+Module      :  Control.Monad.Trans.Indexed.Cont
 Copyright   :  (C) 2026 Eitan Chatav
 License     :  BSD 3-Clause License (see the file LICENSE)
 Maintainer  :  Eitan Chatav <eitan.chatav@gmail.com>
