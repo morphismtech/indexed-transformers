@@ -1,6 +1,6 @@
 {- |
-Module      :  Control.Monad.Trans.Indexed.Cont
-Copyright   :  (C) 2024 Eitan Chatav
+Module      :  Control.Monad.Trans.Indexed.Codensity
+Copyright   :  (C) 2026 Eitan Chatav
 License     :  BSD 3-Clause License (see the file LICENSE)
 Maintainer  :  Eitan Chatav <eitan.chatav@gmail.com>
 
@@ -60,6 +60,3 @@ toContT (ContIx f) = ContT f
 
 fromContT :: ContT i m x -> ContIx i i m x
 fromContT (ContT f) = ContIx f
-
-newtype ContW i j w x = ContW {runContW :: w (x -> j) -> i}
-newtype Cont2W i j w x = Cont2W {runCont2W :: w (x -> j -> j) -> i -> i}
