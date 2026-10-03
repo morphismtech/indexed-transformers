@@ -10,16 +10,18 @@ synopsis:            Atkey indexed monad transformers
 
 extra-source-files:
 - README.md
+
+extra-doc-files:
 - CHANGELOG.md
 
 description: Please see the README on GitHub at <https://github.com/morphismtech/indexed-transformers#readme>
 
 dependencies:
-- base >= 4.7 && < 5
-- free
-- kan-extensions
-- mtl
-- transformers
+- base >= 4.18.1.0 && < 5
+- free >= 5.2 && < 6
+- kan-extensions >= 5.2.5 && < 6
+- mtl >= 2.3.1 && < 3
+- transformers >= 0.6.1.0 && < 1
 
 ghc-options:
 - -Wall
@@ -54,5 +56,5 @@ tests:
     main: Doctests.hs
     source-dirs: test
     dependencies:
-    - doctest
+    - doctest >= 0.22.2 && < 1
     - indexed-transformers

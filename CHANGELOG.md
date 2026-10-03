@@ -10,3 +10,8 @@
 
 * 0.1.0.1-4
   - minor fixes
+
+* 0.2.0.0
+  - added indexed codensity monad transformers
+  - rewrite of free indexed monad transformers
+  - doctests
