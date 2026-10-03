@@ -56,7 +56,14 @@ library:
 tests:
   doctests:
     main: Doctests.hs
-    source-dirs: test
+    source-dirs: test/doctests
     dependencies:
     - doctest >= 0.22.2 && < 1
+    - indexed-transformers
+  spec:
+    main: Spec.hs
+    source-dirs: test/spec
+    dependencies:
+    - hspec >= 2.11.7 && < 3
+    - QuickCheck >= 2.14.3 && < 3
     - indexed-transformers
