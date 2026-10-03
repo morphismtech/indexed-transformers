@@ -15,18 +15,13 @@ module Control.Monad.Trans.Indexed.Codensity
   , wrapCodensityIx
   , resetIx
   , shiftIx
-  , ImproveIx (..)
-  , improveIx
   ) where
 
 import Control.Applicative
 import Control.Monad
 import Control.Monad.Codensity
-import Control.Monad.Free (MonadFree (..))
 import Control.Monad.Reader
 import Control.Monad.Trans.Indexed
-import Control.Monad.Trans.Indexed.Free
-import Control.Monad.Trans.Indexed.Free.Wrap
 import Data.Kind
 
 newtype CodensityIx t i j m a = CodensityIx
@@ -58,16 +53,6 @@ shiftIx
   -> CodensityIx t i i m a
 shiftIx f = CodensityIx $ lowerCodensityIx . f
 
-newtype ImproveIx freeIx f i j m a = ImproveIx
-  { runImproveIx :: CodensityIx (freeIx f) i j m a }
-  deriving Functor
-
-improveIx
-  :: (IxFunctor f, Monad m)
-  => (forall freeIx. IxMonadTransFree freeIx => freeIx f i j m a)
-  -> FreeIx f i j m a
-improveIx m = lowerCodensityIx (runImproveIx m)
-
 instance IxMonadTrans t => IxMonadTrans (CodensityIx t) where
   joinIx (CodensityIx k) =
     CodensityIx $ \f -> k $ \(CodensityIx g) -> g f
@@ -87,40 +72,3 @@ instance (i ~ j, Alternative (t i j m), IxMonadTrans t, Monad m)
     x <|> y = liftCodensityIx (lowerCodensityIx x <|> lowerCodensityIx y)
 instance (i ~ j, Alternative (t i j m), IxMonadTrans t, Monad m)
   => MonadPlus (CodensityIx t i j m)
-instance
-  ( IxMonadTransFree freeIx
-  , IxFunctor f
-  , Monad m
-  , i ~ j
-  ) => MonadFree (f i j) (CodensityIx (freeIx f) i j m) where
-    wrap t = CodensityIx $ \h ->
-      joinIx (liftFreeIx (fmap (\p -> runCodensityIx p h) t))
-
-instance i ~ j => Applicative (ImproveIx freeIx f i j m) where
-  pure = ImproveIx . pure
-  ImproveIx cf <*> ImproveIx cx = ImproveIx (cf <*> cx)
-instance i ~ j => Monad (ImproveIx freeIx f i j m) where
-  return = pure
-  ImproveIx cx >>= k = ImproveIx (cx >>= runImproveIx . k)
-instance (IxMonadTransFree freeIx, IxFunctor f, i ~ j)
-  => MonadTrans (ImproveIx freeIx f i j) where
-    lift = ImproveIx . lift
-instance (IxMonadTransFree freeIx, IxFunctor f)
-  => IxMonadTrans (ImproveIx freeIx f) where
-    joinIx (ImproveIx m) =
-      ImproveIx (joinIx (runImproveIx <$> m))
-instance
-  ( IxMonadTransFree freeIx
-  , IxFunctor f
-  , Monad m
-  , i ~ j
-  ) => MonadFree (f i j) (ImproveIx freeIx f i j m) where
-    wrap = ImproveIx . wrap . fmap runImproveIx
-instance IxMonadTransFree freeIx
-  => IxMonadTransFree (ImproveIx freeIx) where
-    liftFreeIx = ImproveIx . liftCodensityIx . liftFreeIx
-    hoistFreeIx f
-      = ImproveIx . liftCodensityIx
-      . hoistFreeIx f
-      . lowerCodensityIx . runImproveIx
-    foldFreeIx f = foldFreeIx f . lowerCodensityIx . runImproveIx
