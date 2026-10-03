@@ -54,6 +54,7 @@ class
   ( IxMonadTrans t
   , forall i m. Monad m => MonadState i (t i i m)
   ) => IxMonadTransState t where
+  {-# MINIMAL stateIx | getIx, putIx #-}
   getIx :: Monad m => t i i m i
   getIx = stateIx (\i -> return (i,i))
   putIx :: Monad m => j -> t i j m ()

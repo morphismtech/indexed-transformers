@@ -3,7 +3,7 @@ version:             0.2.0.0
 github:              "morphismtech/indexed-transformers"
 license:             BSD-3-Clause
 author:              "Eitan Chatav"
-maintainer:          "eitan@morphism.tech"
+maintainer:          "eitan.chatav@gmail.com"
 copyright:           "2026 Eitan Chatav"
 category:            Control
 synopsis:            Atkey indexed monad transformers

@@ -16,8 +16,8 @@ module Control.Monad.Trans.Indexed.Codensity
   , liftCodensityIx
   , toCodensity
   , wrapCodensityIx
-  , resetIx
-  , shiftIx
+  , resetCodensityIx
+  , shiftCodensityIx
   ) where
 
 import Control.Applicative
@@ -49,14 +49,14 @@ toCodensity (CodensityIx f) = Codensity f
 wrapCodensityIx :: (forall a k. t j k (m :: Type -> Type) a -> t i k m a) -> CodensityIx t i j m ()
 wrapCodensityIx f = CodensityIx (\k -> f (k ()))
 
-resetIx :: (IxMonadTrans t, Monad m) => CodensityIx t i j m a -> CodensityIx t i j m a
-resetIx = liftCodensityIx . lowerCodensityIx
+resetCodensityIx :: (IxMonadTrans t, Monad m) => CodensityIx t i j m a -> CodensityIx t i j m a
+resetCodensityIx = liftCodensityIx . lowerCodensityIx
 
-shiftIx
+shiftCodensityIx
   :: (IxMonadTrans t, Monad m)
   => (forall b k. (a -> t i k m b) -> CodensityIx t i k m b)
   -> CodensityIx t i i m a
-shiftIx f = CodensityIx $ lowerCodensityIx . f
+shiftCodensityIx f = CodensityIx $ lowerCodensityIx . f
 
 -- CodensityIx instances
 instance IxMonadTrans t => IxMonadTrans (CodensityIx t) where
