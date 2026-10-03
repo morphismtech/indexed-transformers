@@ -73,7 +73,7 @@ test-suite doctests
   autogen-modules:
       Paths_indexed_transformers
   hs-source-dirs:
-      test
+      test/doctests
   default-extensions:
       ConstraintKinds
       DeriveFunctor
@@ -94,6 +94,42 @@ test-suite doctests
       base >=4.18.1.0 && <5
     , doctest >=0.22.2 && <1
     , free >=5.2 && <6
+    , indexed-transformers
+    , kan-extensions >=5.2.5 && <6
+    , mtl >=2.3.1 && <3
+    , transformers >=0.6.1.0 && <1
+  default-language: Haskell2010
+
+test-suite spec
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_indexed_transformers
+  autogen-modules:
+      Paths_indexed_transformers
+  hs-source-dirs:
+      test/spec
+  default-extensions:
+      ConstraintKinds
+      DeriveFunctor
+      FlexibleInstances
+      GADTs
+      ImportQualifiedPost
+      LambdaCase
+      MultiParamTypeClasses
+      PolyKinds
+      QualifiedDo
+      QuantifiedConstraints
+      RankNTypes
+      StandaloneKindSignatures
+      TupleSections
+      TypeOperators
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
+  build-depends:
+      QuickCheck >=2.14.3 && <3
+    , base >=4.18.1.0 && <5
+    , free >=5.2 && <6
+    , hspec >=2.11.7 && <3
     , indexed-transformers
     , kan-extensions >=5.2.5 && <6
     , mtl >=2.3.1 && <3
