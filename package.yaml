@@ -37,8 +37,10 @@ ghc-options:
 default-extensions:
 - ConstraintKinds
 - DeriveFunctor
+- DerivingStrategies
 - FlexibleInstances
 - GADTs
+- GeneralizedNewtypeDeriving
 - ImportQualifiedPost
 - LambdaCase
 - MultiParamTypeClasses
@@ -46,9 +48,11 @@ default-extensions:
 - QualifiedDo
 - QuantifiedConstraints
 - RankNTypes
+- StandaloneDeriving
 - StandaloneKindSignatures
 - TupleSections
 - TypeOperators
+- UndecidableInstances
 
 library:
   source-dirs: src

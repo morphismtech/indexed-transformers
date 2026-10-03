@@ -9,15 +9,15 @@ The indexed codensity monad transformer.
 
 module Control.Monad.Trans.Indexed.Codensity
   ( CodensityIx (..)
-  , PredensityIx (..)
-  , predensityToStateIx
-  , stateToPredensityIx
   , lowerCodensityIx
   , liftCodensityIx
   , toCodensity
   , wrapCodensityIx
   , resetCodensityIx
   , shiftCodensityIx
+  , PredensityIx (..)
+  , predensityToStateIx
+  , stateToPredensityIx
   ) where
 
 import Control.Applicative
