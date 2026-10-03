@@ -11,14 +11,15 @@ module Control.Monad.Trans.Indexed.State
   ( StateIx (..)
   , evalStateIx
   , execStateIx
-  , modifyIx
-  , putIx
   , toStateT
   , fromStateT
+  , IxMonadTransState (..), modifyIx
   ) where
 
+import Control.Monad.Reader
 import Control.Monad.State
 import Control.Monad.Trans.Indexed
+import Control.Monad.Trans.Indexed.Do qualified as Indexed
 
 newtype StateIx i j m x = StateIx { runStateIx :: i -> m (x, j)}
   deriving Functor
@@ -43,14 +44,27 @@ evalStateIx m i = fst <$> runStateIx m i
 execStateIx :: Monad m => StateIx i j m x -> i -> m j
 execStateIx m i = snd <$> runStateIx m i
 
-modifyIx :: Applicative m => (i -> j) -> StateIx i j m ()
-modifyIx f = StateIx $ \i -> pure ((), f i)
-
-putIx :: Applicative m => j -> StateIx i j m ()
-putIx j = modifyIx (\ _ -> j)
-
 toStateT :: StateIx i i m x -> StateT i m x
 toStateT (StateIx f) = StateT f
 
 fromStateT :: StateT i m x -> StateIx i i m x
 fromStateT (StateT f) = StateIx f
+
+class
+  ( IxMonadTrans t
+  , forall i m. Monad m => MonadState i (t i i m)
+  ) => IxMonadTransState t where
+  getIx :: Monad m => t i i m i
+  getIx = stateIx (\i -> return (i,i))
+  putIx :: Monad m => j -> t i j m ()
+  putIx i = stateIx (\_ -> return ((),i))
+  stateIx :: Monad m => (i -> m (x,j)) -> t i j m x
+  stateIx f = Indexed.do
+    i <- getIx
+    ~(x, j) <- lift (f i)
+    putIx j
+    return x
+instance IxMonadTransState StateIx where
+  stateIx = StateIx
+modifyIx :: (IxMonadTransState t, Monad m) => (i -> j) -> t i j m ()
+modifyIx f = stateIx (\i -> return ((), f i))
