@@ -1,0 +1,111 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  cabal:
+    name: cabal / ghc ${{ matrix.ghc }} / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        ghc: ['9.6', '9.8', '9.10', '9.12', '9.14']
+        include:
+          - os: macos-latest
+            ghc: '9.10'
+          - os: windows-latest
+            ghc: '9.10'
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up GHC ${{ matrix.ghc }}
+        uses: haskell-actions/setup@v2
+        id: setup
+        with:
+          ghc-version: ${{ matrix.ghc }}
+          cabal-version: latest
+          cabal-update: true
+
+      # doctest-parallel needs a GHC environment file, written by the build step.
+      - name: Configure the build
+        run: |
+          cabal configure --enable-tests --disable-documentation --write-ghc-environment-files=always
+          cabal build all --dry-run
+
+      - name: Restore cached dependencies
+        uses: actions/cache/restore@v6
+        id: cache
+        env:
+          key: ${{ runner.os }}-ghc-${{ steps.setup.outputs.ghc-version }}-cabal-${{ steps.setup.outputs.cabal-version }}
+        with:
+          path: ${{ steps.setup.outputs.cabal-store }}
+          key: ${{ env.key }}-plan-${{ hashFiles('**/plan.json') }}
+          restore-keys: ${{ env.key }}-
+
+      - name: Install dependencies
+        run: cabal build all --only-dependencies
+
+      - name: Save cached dependencies
+        uses: actions/cache/save@v6
+        if: steps.cache.outputs.cache-hit != 'true'
+        with:
+          path: ${{ steps.setup.outputs.cabal-store }}
+          key: ${{ steps.cache.outputs.cache-primary-key }}
+
+      - name: Build
+        run: cabal build all
+
+      - name: Test
+        run: cabal test all --test-show-details=direct
+
+      - name: Check
+        run: cabal check
+
+      - name: Documentation
+        run: cabal haddock all
+
+      - name: Source distribution
+        run: cabal sdist
+
+  stack:
+    name: stack / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up stack
+        uses: haskell-actions/setup@v2
+        with:
+          enable-stack: true
+          stack-no-global: true
+          stack-version: latest
+
+      - name: Cache stack
+        uses: actions/cache@v6
+        with:
+          path: |
+            ~/.stack
+            .stack-work
+          key: ${{ runner.os }}-stack-${{ hashFiles('stack.yaml', 'package.yaml') }}
+          restore-keys: ${{ runner.os }}-stack-
+
+      - name: Build and test
+        run: stack build --test --haddock --no-haddock-deps
