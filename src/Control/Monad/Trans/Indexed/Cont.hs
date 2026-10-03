@@ -49,7 +49,7 @@ instance i ~ j => MonadCont (ContIx i j m) where callCC = callCCIx
 {- | The result of running a CPS computation with 'return' as the
 final continuation.
 
-prop> evalContIx (lift m) = m
+> prop> evalContIx (lift m) = m
 -}
 evalContIx :: Monad m => ContIx x j m j -> m x
 evalContIx c = runContIx c return
@@ -57,7 +57,7 @@ evalContIx c = runContIx c return
 {- | Apply a function to transform the result of a continuation-passing
 computation.
 
-prop> runContIx (mapContIx f m) = f . runContIx m
+> prop> runContIx (mapContIx f m) = f . runContIx m
 -}
 mapContIx :: (m i -> m j) -> ContIx i k m x -> ContIx j k m x
 mapContIx g (ContIx f) = ContIx $ g . f
@@ -65,7 +65,7 @@ mapContIx g (ContIx f) = ContIx $ g . f
 {- | Apply a function to transform the continuation passed to a CPS
 computation.
 
-prop> runContIx (withContIx f m) = runContIx m . f
+> prop> runContIx (withContIx f m) = runContIx m . f
 -}
 withContIx :: ((y -> m k) -> x -> m j) -> ContIx i j m x -> ContIx i k m y
 withContIx f (ContIx g) = ContIx $ g . f
@@ -92,14 +92,14 @@ callCCIx f = ContIx $ \k -> runContIx (f (ContIx . const . k)) k
 {- | @'shiftIx' f@ captures the continuation up to the nearest enclosing
 'resetIx' and passes it to @f@:
 
-prop> resetIx (shiftIx f >>= k) = resetIx (f (evalContIx . k))
+> prop> resetIx (shiftIx f >>= k) = resetIx (f (evalContIx . k))
 -}
 shiftIx :: Monad m => ((x -> m j) -> ContIx i k m k) -> ContIx i j m x
 shiftIx f = ContIx (evalContIx . f)
 
 {- | @'resetIx' m@ delimits the continuation of any 'shiftIx' inside @m@.
 
-prop> resetIx (lift m) = lift m
+> prop> resetIx (lift m) = lift m
 -}
 resetIx :: Monad m => ContIx x j m j -> ContIx i i m x
 resetIx = lift . evalContIx

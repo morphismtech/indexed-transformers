@@ -16,8 +16,8 @@ module Control.Monad.Trans.Indexed.Codensity
   , resetCodensityIx
   , shiftCodensityIx
   , PredensityIx (..)
-  , predensityToStateIx
-  , stateToPredensityIx
+  , lowerToStateIx
+  , liftFromStateIx
   ) where
 
 import Control.Applicative
@@ -49,7 +49,7 @@ newtype CodensityIx t i j m a = CodensityIx
 {- |
 This serves as the *left*-inverse (retraction) of 'liftCodensityIx'.
 
-prop> lowerCodensityIx . liftCodensityIx ≡ id
+> prop> lowerCodensityIx . liftCodensityIx ≡ id
 
 In general this is not a full 2-sided inverse, merely a retraction, as
 @'CodensityIx' t@ is often considerably \"larger\" than @t@.
@@ -79,7 +79,7 @@ wrapCodensityIx f = CodensityIx (\k -> f (k ()))
 
 {- | @'resetCodensityIx' m@ delimits the continuation of any 'shiftCodensityIx' inside @m@.
 
-prop> resetCodensityIx (return m) = return m
+> prop> resetCodensityIx (return m) = return m
 -}
 resetCodensityIx :: (IxMonadTrans t, Monad m) => CodensityIx t i j m a -> CodensityIx t i j m a
 resetCodensityIx = liftCodensityIx . lowerCodensityIx
@@ -87,7 +87,7 @@ resetCodensityIx = liftCodensityIx . lowerCodensityIx
 {- | @'shiftCodensityIx' f@ captures the continuation up to the nearest enclosing
 'resetCodensityIx' and passes it to @f@:
 
-prop> resetCodensityIx (shiftCodensityIx f & bindIx k) = resetCodensityIx (f (lowerCodensityIx . k))
+> prop> resetCodensityIx (shiftCodensityIx f & bindIx k) = resetCodensityIx (f (lowerCodensityIx . k))
 -}
 shiftCodensityIx
   :: (IxMonadTrans t, Monad m)
@@ -116,23 +116,28 @@ instance (i ~ j, Alternative (t i j m), IxMonadTrans t, Monad m)
 instance (i ~ j, Alternative (t i j m), IxMonadTrans t, Monad m)
   => MonadPlus (CodensityIx t i j m)
 
-{- | `PredensityIx` `ReaderT` is an efficient, isomorphic encoding of `StateIx`.
+{- | `PredensityIx` `ReaderT` is an efficient encoding of `StateIx`.
 
-prop> predensityToStateIx . stateToPredensityIx ≡ id
-prop> stateToPredensityIx . predensityToStateIx ≡ id
+'lowerToStateIx' is the *left*-inverse (retraction) of 'liftFromStateIx'.
+
+> prop> lowerToStateIx . liftFromStateIx ≡ id
+
+In general this is not a full 2-sided inverse, merely a retraction, as
+@'PredensityIx' 'ReaderT'@ is \"larger\" than `StateIx`:
+it may call its continuation any number of times.
 -}
 newtype PredensityIx t i j m a = PredensityIx
   { runPredensityIx :: forall b. (a -> t j m b) -> t i m b }
   deriving Functor
 
 {- | Convert to `StateIx`. -}
-predensityToStateIx :: Monad m => PredensityIx ReaderT i j m a -> StateIx i j m a
-predensityToStateIx (PredensityIx f) =
+lowerToStateIx :: Monad m => PredensityIx ReaderT i j m a -> StateIx i j m a
+lowerToStateIx (PredensityIx f) =
   StateIx . runReaderT . f $ \x -> ReaderT $ \j -> return (x, j)
 
 {- | Convert from `StateIx`. -}
-stateToPredensityIx :: Monad m => StateIx i j m a -> PredensityIx ReaderT i j m a
-stateToPredensityIx (StateIx f) =
+liftFromStateIx :: Monad m => StateIx i j m a -> PredensityIx ReaderT i j m a
+liftFromStateIx (StateIx f) =
   PredensityIx $ \k -> ReaderT $ \i -> f i >>= \(x, j) -> runReaderT (k x) j
 
 -- PredensityIx instances

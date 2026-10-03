@@ -33,7 +33,8 @@ The 'return' function leaves the state unchanged, while 'bindIx' uses
 the final state of the first computation as the initial state of
 the second.
 
-An efficient, isomorphic encoding of `StateIx` is
+An efficient encoding of `StateIx`, up to the retraction
+`Control.Monad.Trans.Indexed.Codensity.lowerToStateIx`, is
 `Control.Monad.Trans.Indexed.Codensity.PredensityIx` `ReaderT`.
 -}
 newtype StateIx i j m x = StateIx { runStateIx :: i -> m (x, j)}
@@ -98,7 +99,7 @@ instance IxMonadTransState StateIx where
 {- | @'modifyIx' f@ is an action that updates the state to the result of
 applying @f@ to the current state.
 
-prop> modifyIx f = getIx & bindIx (putIx . f)
+> prop> modifyIx f = getIx & bindIx (putIx . f)
 -}
 modifyIx :: (IxMonadTransState t, Monad m) => (i -> j) -> t i j m ()
 modifyIx f = stateIx (\i -> return ((), f i))

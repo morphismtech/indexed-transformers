@@ -102,7 +102,7 @@ observeFree = observeState . foldFreerIx runCmd
 stateSubjects :: [Subject]
 stateSubjects =
   [ Subject "StateIx" stateOp observeState
-  , Subject "PredensityIx ReaderT" stateOp (observeState . predensityToStateIx)
+  , Subject "PredensityIx ReaderT" stateOp (observeState . lowerToStateIx)
   , Subject "CodensityIx StateIx"
       (liftCodensityIx . stateOp) (observeState . lowerCodensityIx)
   , Subject "CodensityIx FreeIx"
@@ -191,17 +191,17 @@ stateLaws name toState = describe name $ do
 
 predensitySpec :: Spec
 predensitySpec = describe "PredensityIx ReaderT" $ do
-  it "predensityToStateIx . stateToPredensityIx = id" $ property $
+  it "lowerToStateIx . liftFromStateIx = id" $ property $
     \(Fn (f :: Int -> ([Int], (Bool, String)))) s ->
       let m = StateIx (w . f)
-      in runWriter (runStateIx (predensityToStateIx (stateToPredensityIx m)) s)
+      in runWriter (runStateIx (lowerToStateIx (liftFromStateIx m)) s)
         === runWriter (runStateIx m s)
-  it "stateToPredensityIx . predensityToStateIx = id" $ property $
+  it "liftFromStateIx . lowerToStateIx = id on stateIx terms" $ property $
     \prog (Fn2 (k :: Int -> Int -> ([Int], Int))) s ->
       let
         m = interp stateOp prog
         run m' = runWriter (runReaderT (runPredensityIx m' (\x -> ReaderT (w . k x))) s)
-      in run (stateToPredensityIx (predensityToStateIx m)) === run m
+      in run (liftFromStateIx (lowerToStateIx m)) === run m
 
 codensitySpec :: Spec
 codensitySpec = describe "CodensityIx StateIx" $ do
@@ -328,7 +328,7 @@ main = hspec $ do
         run (interp op prog) s === observeState (interp stateOp prog) s
   describe "IxMonadTransState laws" $ do
     stateLaws "StateIx" id
-    stateLaws "PredensityIx ReaderT" predensityToStateIx
+    stateLaws "PredensityIx ReaderT" lowerToStateIx
   predensitySpec
   codensitySpec
   describe "IxMonadTransFree" $ traverse_ freeSpec freeSubjects

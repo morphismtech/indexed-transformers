@@ -48,7 +48,7 @@ class
   {- |
   indexed analog of `<*>`
 
-  prop> (<*>) = apIx
+  > prop> (<*>) = apIx
   -}
   apIx
     :: Monad m
@@ -60,8 +60,8 @@ class
   {- |
   indexed analog of `join`
 
-  prop> join = joinIx
-  prop> joinIx = bindIx id
+  > prop> join = joinIx
+  > prop> joinIx = bindIx id
   -}
   joinIx
     :: Monad m
@@ -72,10 +72,10 @@ class
   {- |
   indexed analog of `=<<`
 
-  prop> (=<<) = bindIx
-  prop> bindIx f x = joinIx (f <$> x)
-  prop> x & bindIx return = x
-  prop> x & bindIx f & bindIx g = x & bindIx (f & andThenIx g)
+  > prop> (=<<) = bindIx
+  > prop> bindIx f x = joinIx (f <$> x)
+  > prop> x & bindIx return = x
+  > prop> x & bindIx f & bindIx g = x & bindIx (f & andThenIx g)
   -}
   bindIx
     :: Monad m
@@ -87,8 +87,8 @@ class
   {- |
   indexed analog of flipped `>>`
 
-  prop> (>>) = flip thenIx
-  prop> return () & thenIx y = y
+  > prop> (>>) = flip thenIx
+  > prop> return () & thenIx y = y
   -}
   thenIx
     :: Monad m
@@ -100,11 +100,11 @@ class
   {- |
   indexed analog of `<=<`
 
-  prop> (<=<) = andThenIx
-  prop> andThenIx g f x = bindIx g (f x)
-  prop> f & andThenIx return = f
-  prop> return & andThenIx f = f
-  prop> f & andThenIx g & andThenIx h = f & andThenIx (g & andThenIx h)
+  > prop> (<=<) = andThenIx
+  > prop> andThenIx g f x = bindIx g (f x)
+  > prop> f & andThenIx return = f
+  > prop> return & andThenIx f = f
+  > prop> f & andThenIx g & andThenIx h = f & andThenIx (g & andThenIx h)
   -}
   andThenIx
     :: Monad m
