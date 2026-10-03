@@ -14,7 +14,6 @@ module Control.Monad.Trans.Indexed.State
   , toStateT
   , fromStateT
   , IxMonadTransState (..), modifyIx
-  , MonadTransReader (..)
   ) where
 
 import Control.Monad.Reader
@@ -69,16 +68,3 @@ instance IxMonadTransState StateIx where
   stateIx = StateIx
 modifyIx :: (IxMonadTransState t, Monad m) => (i -> j) -> t i j m ()
 modifyIx f = stateIx (\i -> return ((), f i))
-
-
-class
-  ( forall i. MonadTrans (t i)
-  , forall i m. Monad m => MonadReader i (t i m)
-  ) => MonadTransReader t where
-  askT :: Monad m => t i m i
-  localT :: Monad m => (j -> i) -> t i m x -> t j m x
-  readerT :: Monad m => (i -> m x) -> t i m x
-instance MonadTransReader ReaderT where
-  askT = ask
-  localT = withReaderT
-  readerT = ReaderT

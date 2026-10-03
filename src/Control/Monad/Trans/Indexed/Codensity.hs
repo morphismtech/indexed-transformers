@@ -10,6 +10,8 @@ The indexed codensity monad transformer.
 module Control.Monad.Trans.Indexed.Codensity
   ( CodensityIx (..)
   , PredensityIx (..)
+  , predensityToStateIx
+  , stateToPredensityIx
   , lowerCodensityIx
   , liftCodensityIx
   , toCodensity
@@ -21,6 +23,7 @@ module Control.Monad.Trans.Indexed.Codensity
 import Control.Applicative
 import Control.Monad
 import Control.Monad.Codensity
+import Control.Monad.Reader
 import Control.Monad.State
 import Control.Monad.Trans.Indexed
 import Control.Monad.Trans.Indexed.State
@@ -28,10 +31,6 @@ import Data.Kind
 
 newtype CodensityIx t i j m a = CodensityIx
   { runCodensityIx :: forall b k. (a -> t j k m b) -> t i k m b }
-  deriving Functor
-
-newtype PredensityIx t i j m a = PredensityIx
-  { runPredensityIx :: forall b. (a -> t j m b) -> t i m b }
   deriving Functor
 
 lowerCodensityIx
@@ -80,6 +79,19 @@ instance (i ~ j, Alternative (t i j m), IxMonadTrans t, Monad m)
 instance (i ~ j, Alternative (t i j m), IxMonadTrans t, Monad m)
   => MonadPlus (CodensityIx t i j m)
 
+{- | `PredensityIx` `ReaderT` is an efficient encoding of `StateIx`. -}
+newtype PredensityIx t i j m a = PredensityIx
+  { runPredensityIx :: forall b. (a -> t j m b) -> t i m b }
+  deriving Functor
+
+predensityToStateIx :: Monad m => PredensityIx ReaderT i j m a -> StateIx i j m a
+predensityToStateIx (PredensityIx f) =
+  StateIx . runReaderT . f $ \x -> ReaderT $ \j -> return (x, j)
+
+stateToPredensityIx :: Monad m => StateIx i j m a -> PredensityIx ReaderT i j m a
+stateToPredensityIx (StateIx f) =
+  PredensityIx $ \k -> ReaderT $ \i -> f i >>= \(x, j) -> runReaderT (k x) j
+
 -- PredensityIx instances
 instance (forall i. MonadTrans (t i)) => IxMonadTrans (PredensityIx t) where
   joinIx (PredensityIx k) =
@@ -94,9 +106,9 @@ instance i ~ j => Monad (PredensityIx t i j m) where
     PredensityIx $ \ c -> cx (\ x -> runPredensityIx (k x) c)
 instance (MonadTrans (t i), i ~ j) => MonadTrans (PredensityIx t i j) where
   lift m = PredensityIx (lift m >>=)
-instance (MonadTransReader t, i ~ j, Monad m) => MonadState i (PredensityIx t i j m) where
+instance (i ~ j, Monad m) => MonadState i (PredensityIx ReaderT i j m) where
   get = getIx
   put = putIx
-instance MonadTransReader t => IxMonadTransState (PredensityIx t) where
-  getIx = PredensityIx (askT >>=)
-  putIx j = PredensityIx (\k -> localT (const j) (k ()))
+instance IxMonadTransState (PredensityIx ReaderT) where
+  getIx = PredensityIx (ask >>=)
+  putIx j = PredensityIx (\k -> withReaderT (const j) (k ()))
