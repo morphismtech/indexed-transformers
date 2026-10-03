@@ -120,9 +120,9 @@ coerceFreeIx = foldFreeIx liftFreeIx
 This can improve the asymptotic efficiency of the result, while preserving semantics.
 
 See \"Asymptotic Improvement of Computations over Free Monads\" by Janis
-Voightländer for more information about this combinator.
+Voigtländer for more information about this combinator.
 
-<http://www.iai.uni-bonn.de/~jv/mpc08.pdf>
+<https://www.janis-voigtlaender.eu/papers/AsymptoticImprovementOfComputationsOverFreeMonads.pdf>
 -}
 improveIx
   :: (forall k l. Functor (f k l), Monad m)

@@ -73,7 +73,7 @@ withContIx f (ContIx g) = ContIx $ g . f
 {- | @callCCIx@ (call-with-current-continuation) calls its argument
 function, passing it the current continuation.  It provides
 an escape continuation mechanism for use with continuation
-monads.  Escape continuations one allow to abort the current
+monads.  Escape continuations allow one to abort the current
 computation and return a value immediately.  They achieve
 a similar effect to 'Control.Monad.Trans.Except.throwE'
 and 'Control.Monad.Trans.Except.catchE' within an
