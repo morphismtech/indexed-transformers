@@ -22,6 +22,7 @@ import qualified Control.Monad.Trans as T
 import qualified Control.Monad.Trans.Indexed as Ix
 import Prelude hiding ((>>=), (>>), fail)
 
+{- | Indexed binding. -}
 (>>=)
   :: (Ix.IxMonadTrans t, M.Monad m)
   => t i j m x
@@ -29,6 +30,7 @@ import Prelude hiding ((>>=), (>>), fail)
   -> t i k m y
 (>>=) = flip Ix.bindIx
 
+{- | Indexed sequencing. -}
 (>>)
   :: (Ix.IxMonadTrans t, M.Monad m)
   => t i j m x
@@ -36,6 +38,7 @@ import Prelude hiding ((>>=), (>>), fail)
   -> t i k m y
 (>>) = flip Ix.thenIx
 
+{- | Indexed failing. -}
 fail
   :: (Ix.IxMonadTrans t, M.MonadFail m, i ~ j)
   => String
