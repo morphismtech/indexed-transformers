@@ -48,3 +48,11 @@ default-extensions:
 
 library:
   source-dirs: src
+
+tests:
+  doctests:
+    main: Doctests.hs
+    source-dirs: test
+    dependencies:
+    - doctest
+    - indexed-transformers

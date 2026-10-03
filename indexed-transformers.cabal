@@ -61,3 +61,36 @@ library
     , mtl
     , transformers
   default-language: Haskell2010
+
+test-suite doctests
+  type: exitcode-stdio-1.0
+  main-is: Doctests.hs
+  other-modules:
+      Paths_indexed_transformers
+  autogen-modules:
+      Paths_indexed_transformers
+  hs-source-dirs:
+      test
+  default-extensions:
+      ConstraintKinds
+      DeriveFunctor
+      FlexibleInstances
+      GADTs
+      LambdaCase
+      MultiParamTypeClasses
+      PolyKinds
+      QuantifiedConstraints
+      RankNTypes
+      StandaloneKindSignatures
+      TupleSections
+      TypeOperators
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
+  build-depends:
+      base >=4.7 && <5
+    , doctest
+    , free
+    , indexed-transformers
+    , kan-extensions
+    , mtl
+    , transformers
+  default-language: Haskell2010

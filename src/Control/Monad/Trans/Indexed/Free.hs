@@ -108,8 +108,8 @@ class
     -> freeIx f i j m x -> t i j m x
 
 {- |
-prop> coerceFreeIx = foldFreeIx liftFreeIx
-prop> id = coerceFreeIx . coerceFreeIx
+@prop> coerceFreeIx = foldFreeIx liftFreeIx@
+@prop> id = coerceFreeIx . coerceFreeIx@
 -}
 coerceFreeIx
   :: (IxMonadTransFree freeIx0, IxMonadTransFree freeIx1, forall s t. Functor (f s t), Monad m)
