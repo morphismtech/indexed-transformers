@@ -1,9 +1,3 @@
-{-# LANGUAGE DerivingStrategies #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE StandaloneDeriving #-}
-{-# LANGUAGE UndecidableInstances #-}
-{-# OPTIONS_GHC -fno-warn-name-shadowing #-}
-
 {- |
 Module      :  Control.Monad.Trans.Indexed.Free
 Copyright   :  (C) 2026 Eitan Chatav
@@ -87,34 +81,38 @@ is characterized by the `IxMonadTransFree` class
 up to the isomorphism `coerceFreeIx`.
 -}
 class
-  ( forall f. (forall s t. Functor (f s t)) => IxMonadTrans (freeIx f)
-  , forall f m i j. (forall s t. Functor (f s t), Monad m, i ~ j)
+  ( forall f. (forall k l. Functor (f k l)) => IxMonadTrans (freeIx f)
+  , forall f m i j. (forall k l. Functor (f k l), Monad m, i ~ j)
     => MonadFree (f i j) (freeIx f i j m)
   ) => IxMonadTransFree freeIx where
   -- | lift a computation 
   liftFreeIx
-    :: (forall s t. Functor (f s t), Monad m)
+    :: (forall k l. Functor (f k l), Monad m)
     => f i j x -- ^ computation
     -> freeIx f i j m x
   -- | hoist a transformation
   hoistFreeIx
-    :: (forall s t. Functor (f s t), forall s t. Functor (g s t), Monad m)
-    => (forall i j x. f i j x -> g i j x) -- ^ transformation
+    :: (forall k l. Functor (f k l), forall k l. Functor (g k l), Monad m)
+    => (forall k l a. f k l a -> g k l a) -- ^ transformation
     -> freeIx f i j m x -> freeIx g i j m x
   -- | fold with a monadic transformation 
   foldFreeIx
-    :: (forall s t. Functor (f s t), IxMonadTrans t, Monad m)
-    => (forall i j x. f i j x -> t i j m x) -- ^ monadic transformation
+    :: (forall k l. Functor (f k l), IxMonadTrans t, Monad m)
+    => (forall k l a. f k l a -> t k l m a) -- ^ monadic transformation
     -> freeIx f i j m x -> t i j m x
 
 {- |
 @
-prop> coerceFreeIx = foldFreeIx liftFreeIx
-prop> id = coerceFreeIx . coerceFreeIx
+prop\> coerceFreeIx = foldFreeIx liftFreeIx
+prop\> id = coerceFreeIx . coerceFreeIx
 @
 -}
 coerceFreeIx
-  :: (IxMonadTransFree freeIx0, IxMonadTransFree freeIx1, forall s t. Functor (f s t), Monad m)
+  :: ( IxMonadTransFree freeIx0
+     , IxMonadTransFree freeIx1
+     , forall k l. Functor (f k l)
+     , Monad m
+     )
   => freeIx0 f i j m x -- ^ from free
   -> freeIx1 f i j m x -- ^ to free
 coerceFreeIx = foldFreeIx liftFreeIx
@@ -129,7 +127,7 @@ Voightländer for more information about this combinator.
 <http://www.iai.uni-bonn.de/~jv/mpc08.pdf>
 -}
 improveIx
-  :: (forall s t. Functor (f s t), Monad m)
+  :: (forall k l. Functor (f k l), Monad m)
   => (forall freeIx. IxMonadTransFree freeIx => freeIx f i j m a) -- ^ improve this
   -> FreeIx f i j m a
 improveIx m = lowerCodensityIx (runImproveFreeIx m)
@@ -158,14 +156,14 @@ liftFreerIx x = liftFreeIx (CoyonedaIx id x)
 -- | Hoist a transformation to `FreerIx`
 hoistFreerIx
   :: (IxMonadTransFree freeIx, Monad m)
-  => (forall i j x. f i j x -> g i j x) -- ^ transformation
+  => (forall k l a. f k l a -> g k l a) -- ^ transformation
   -> FreerIx freeIx f i j m x -> FreerIx freeIx g i j m x
 hoistFreerIx f = hoistFreeIx (\(CoyonedaIx g x) -> CoyonedaIx g (f x))
 
 -- | Fold with a monadic transformation over `FreerIx`.
 foldFreerIx
   :: (IxMonadTransFree freeIx, IxMonadTrans t, Monad m)
-  => (forall i j x. f i j x -> t i j m x) -- ^ monadic transformation
+  => (forall k l a. f k l a -> t k l m a) -- ^ monadic transformation
   -> FreerIx freeIx f i j m x -> t i j m x
 foldFreerIx f x = foldFreeIx (\(CoyonedaIx g y) -> g <$> f y) x
 
@@ -173,7 +171,7 @@ foldFreerIx f x = foldFreeIx (\(CoyonedaIx g y) -> g <$> f y) x
 data WrapFreeIx f i j m x where
   Unwrap :: x -> WrapFreeIx f i i m x
   Wrap :: f i j (FreeIx f j k m x) -> WrapFreeIx f i k m x
-instance (forall s t. Functor (f s t), Monad m)
+instance (forall k l. Functor (f k l), Monad m)
   => Functor (WrapFreeIx f i j m) where
     fmap f = \case
       Unwrap x -> Unwrap $ f x
@@ -181,26 +179,26 @@ instance (forall s t. Functor (f s t), Monad m)
 
 -- | The free indexed monad transformer.
 newtype FreeIx f i j m x = FreeIx {runFreeIx :: m (WrapFreeIx f i j m x)}
-instance (forall s t. Functor (f s t), Monad m)
+instance (forall k l. Functor (f k l), Monad m)
   => Functor (FreeIx f i j m) where
     fmap f (FreeIx m) = FreeIx $ fmap (fmap f) m
-instance (forall s t. Functor (f s t), i ~ j, Monad m)
+instance (forall k l. Functor (f k l), i ~ j, Monad m)
   => Applicative (FreeIx f i j m) where
     pure = FreeIx . pure . Unwrap
     (<*>) = apIx
-instance (forall s t. Functor (f s t), i ~ j, Monad m)
+instance (forall k l. Functor (f k l), i ~ j, Monad m)
   => Monad (FreeIx f i j m) where
     return = pure
     (>>=) = flip bindIx
-instance (forall s t. Functor (f s t), i ~ j)
+instance (forall k l. Functor (f k l), i ~ j)
   => MonadTrans (FreeIx f i j) where
     lift = FreeIx . fmap Unwrap
-instance (forall s t. Functor (f s t)) => IxMonadTrans (FreeIx f) where
+instance (forall k l. Functor (f k l)) => IxMonadTrans (FreeIx f) where
   joinIx (FreeIx mm) = FreeIx $ mm >>= \case
     Unwrap (FreeIx m) -> m
     Wrap fm -> return $ Wrap $ fmap joinIx fm
 instance
-  ( forall s t. Functor (f s t)
+  ( forall k l. Functor (f k l)
   , Monad m
   , i ~ j
   ) => MonadFree (f i j) (FreeIx f i j m) where
@@ -221,25 +219,25 @@ instance IxMonadTransFree FreeIx where
 -- | The free indexed monad transformer, encoded as its `foldFreeIx` function.
 newtype FoldFreeIx g i j m x = FoldFreeIx
   {runFoldFreeIx :: forall t. (IxMonadTrans t, Monad m)
-    => (forall i j x. g i j x -> t i j m x) -> t i j m x}
-instance (forall s t. Functor (f s t), Monad m) => Functor (FoldFreeIx f i j m) where
+    => (forall k l a. g k l a -> t k l m a) -> t i j m x}
+instance (forall k l. Functor (f k l), Monad m) => Functor (FoldFreeIx f i j m) where
   fmap f (FoldFreeIx k) = FoldFreeIx $ \step -> fmap f (k step)
-instance (forall s t. Functor (f s t), i ~ j, Monad m)
+instance (forall k l. Functor (f k l), i ~ j, Monad m)
   => Applicative (FoldFreeIx f i j m) where
     pure x = FoldFreeIx $ const $ pure x
     (<*>) = apIx
-instance (forall s t. Functor (f s t), i ~ j, Monad m)
+instance (forall k l. Functor (f k l), i ~ j, Monad m)
   => Monad (FoldFreeIx f i j m) where
     return = pure
     (>>=) = flip bindIx
-instance (forall s t. Functor (f s t), i ~ j)
+instance (forall k l. Functor (f k l), i ~ j)
   => MonadTrans (FoldFreeIx f i j) where
     lift m = FoldFreeIx $ const $ lift m
-instance (forall s t. Functor (f s t))
+instance (forall k l. Functor (f k l))
   => IxMonadTrans (FoldFreeIx f) where
     joinIx (FoldFreeIx g) = FoldFreeIx $ \k -> bindIx (\(FoldFreeIx f) -> f k) (g k)
 instance
-  ( forall s t. Functor (f s t)
+  ( forall k l. Functor (f k l)
   , Monad m
   , i ~ j
   ) => MonadFree (f i j) (FoldFreeIx f i j m) where
@@ -255,10 +253,10 @@ newtype ImproveFreeIx f i j m a = ImproveFreeIx
 deriving newtype instance Functor (ImproveFreeIx f i j m)
 deriving newtype instance i ~ j => Applicative (ImproveFreeIx f i j m)
 deriving newtype instance i ~ j => Monad (ImproveFreeIx f i j m)
-deriving newtype instance (forall s t. Functor (f s t), i ~ j) => MonadTrans (ImproveFreeIx f i j)
-deriving newtype instance (forall s t. Functor (f s t)) => IxMonadTrans (ImproveFreeIx f)
+deriving newtype instance (forall k l. Functor (f k l), i ~ j) => MonadTrans (ImproveFreeIx f i j)
+deriving newtype instance (forall k l. Functor (f k l)) => IxMonadTrans (ImproveFreeIx f)
 instance
-  ( forall s t. Functor (f s t)
+  ( forall k l. Functor (f k l)
   , Monad m
   , i ~ j
   ) => MonadFree (f i j) (ImproveFreeIx f i j m) where

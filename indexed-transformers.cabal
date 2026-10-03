@@ -44,8 +44,10 @@ library
   default-extensions:
       ConstraintKinds
       DeriveFunctor
+      DerivingStrategies
       FlexibleInstances
       GADTs
+      GeneralizedNewtypeDeriving
       ImportQualifiedPost
       LambdaCase
       MultiParamTypeClasses
@@ -53,9 +55,11 @@ library
       QualifiedDo
       QuantifiedConstraints
       RankNTypes
+      StandaloneDeriving
       StandaloneKindSignatures
       TupleSections
       TypeOperators
+      UndecidableInstances
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       base >=4.18.1.0 && <5
@@ -77,8 +81,10 @@ test-suite doctests
   default-extensions:
       ConstraintKinds
       DeriveFunctor
+      DerivingStrategies
       FlexibleInstances
       GADTs
+      GeneralizedNewtypeDeriving
       ImportQualifiedPost
       LambdaCase
       MultiParamTypeClasses
@@ -86,9 +92,11 @@ test-suite doctests
       QualifiedDo
       QuantifiedConstraints
       RankNTypes
+      StandaloneDeriving
       StandaloneKindSignatures
       TupleSections
       TypeOperators
+      UndecidableInstances
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       base >=4.18.1.0 && <5
